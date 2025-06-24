@@ -138,7 +138,7 @@ export default {
     },
     
     submitForm() {
-      fetch("https://zhilan-leo-photo-survey-api.hf.space/submit", {
+      fetch("https://zhilan-leo-il-photography-backward.hf.space/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
