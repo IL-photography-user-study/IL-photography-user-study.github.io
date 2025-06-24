@@ -139,7 +139,7 @@ export default {
     submitForm() {
       console.log("提交的评分:", this.ratings);
       //send to backward
-      axios.post('https://github.com/Zhilan-leo/IL-photography-backend.git',{
+      axios.post('https://il-photography-backend.onrender.com',{
         ratings: this.ratings
       })
     },
