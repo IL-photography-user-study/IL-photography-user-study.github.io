@@ -136,13 +136,26 @@ export default {
     handlePageChange(page) {
       this.currentPage = page;
     },
+    
     submitForm() {
-      console.log("提交的评分:", this.ratings);
-      //send to backward
-      axios.post('https://il-photography-backend.onrender.com',{
-        ratings: this.ratings
+      fetch("https://zhilan-leo-photo-survey-api.hf.space/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ratings: this.ratings })
       })
-    },
+        .then(response => response.json())
+        .then(data => {
+          console.log("submit:", data);
+          this.$message.success("submit successful");
+        })
+        .catch((err) => {
+          console.error(err);
+          this.$message.error("submit fail");
+        });
+    }
+
   },
 };
 </script>
