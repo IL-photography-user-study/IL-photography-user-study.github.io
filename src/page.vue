@@ -137,6 +137,7 @@ export default {
       this.currentPage = page;
     },
     
+  
     submitForm() {
       fetch("https://zhilan-leo-il-photography-backward.hf.space/submit", {
         method: "POST",
@@ -145,16 +146,22 @@ export default {
         },
         body: JSON.stringify({ ratings: this.ratings })
       })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
         .then(data => {
           console.log("submit:", data);
           this.$message.success("submit successful");
         })
         .catch((err) => {
-          console.error(err);
+          console.error("submit error:", err);
           this.$message.error("submit fail");
         });
     }
+
 
   },
 };
