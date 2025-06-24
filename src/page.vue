@@ -96,7 +96,7 @@ export default {
       totalImages: 8, 
       pageSize: 4,    
       currentPage: 1,
-      ratings: Array.from({ length: 12 }, () => Array(4).fill(3)),
+      ratings: Array.from({ length: 8 }, () => Array(4).fill(2)),
       marks: {
         1: '1',
         2: '2',
