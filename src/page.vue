@@ -1,44 +1,88 @@
-<!--
- * @Author: liaozhilan lzl16975772022@163.com
- * @Date: 2025-06-24 09:28:37
- * @LastEditors: liaozhilan lzl16975772022@163.com
- * @LastEditTime: 2025-06-24 11:07:45
- * @FilePath: \IL-photography\page.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
 <template>
-  <div id="components-grid-demo-rating">
-    <a-row :gutter="16">
-      <a-col
-        v-for="(item, imgIndex) in 4"
-        :key="imgIndex"
-        :span="6"
-        style="text-align: center"
-      >
-        <!-- 图片 -->
-        <img
-          :src="require(`@/assets/photo/${imgIndex}.jpg`)"
-          :alt="'Image ' + imgIndex"
-          class="zoom-image"
-        />
-        <!-- style="width: 100%; margin-bottom: 12px"  -->
-        <!-- 每张图片对应 4 个评分 -->
-        <div v-for="(question, qIndex) in 4" :key="qIndex" style="margin-bottom: 16px;">
-          <span class="question-label">Q{{ qIndex + 1 }}</span>
-          <a-slider
-            v-model="ratings[imgIndex][qIndex]"
-            :min="1"
-            :max="5"
-            :marks="marks"
-            :step="1"
-          />
-        </div>
-      </a-col>
-    </a-row>
+  <div>
+    <div class="description">
+      <p><strong>Objective：</strong></p>
+      <p>To evaluate the quality of photographic works from multiple dimensions.</p>
 
-    <!-- 提交按钮 -->
-    <div style="text-align: center; margin-top: 24px;">
-      <a-button type="primary" @click="submitForm">提交评分</a-button>
+      <p><strong>Questionnaire:</strong></p>
+      <ol>
+        <li>How well is the image composited? (comply with rules of thirds, balancing elements, or symmetry)</li>
+        <li>How well is the main subject emphasized in the image?</li>
+        <li>How well does the image highlight the relation between the character and the background?</li>
+        <li>How well does the image have the sense of telling stories?</li>
+      </ol>
+    </div>
+
+    <div class="image-grid">
+      <a-row :gutter="16">
+        <a-col
+          v-for="img in currentPageImages"
+          :key="img"
+          :span="6"
+          style="text-align: center"
+        >
+          <img
+            :src="getImagePath(img)"
+            class="thumbnail"
+            @click="openPreview(img)"
+          />
+
+          <div class="slider-column">
+            <div
+              v-for="qIndex in 4"
+              :key="qIndex"
+              class="slider-item"
+            >
+              <span class="question-label">Q{{ qIndex }}</span>
+              <a-slider
+                v-model="ratings[img - 1][qIndex - 1]"
+                :min="1"
+                :max="5"
+                :marks="marks"
+                :step="1"
+                style="flex: 1"
+              />
+            </div>
+          </div>
+        </a-col>
+      </a-row>
+
+      <!-- 分页组件 -->
+      <div style="text-align: center; margin-top: 24px;">
+        <a-pagination
+          :current="currentPage"
+          :page-size="pageSize"
+          :total="totalImages"
+          @change="handlePageChange"
+          simple
+        />
+      </div>
+
+      <!-- 走马灯弹窗 -->
+      <a-modal
+        :visible="previewVisible"
+        :footer="null"
+        :width="800"
+        centered
+        @cancel="previewVisible = false"
+      >
+        <a-carousel
+          ref="carousel"
+          :dots="false"
+          arrows
+          :initial-slide="currentIndex"
+          @afterChange="updateCurrentIndex"
+        >
+          <div v-for="img in totalImageNumbers" :key="img">
+            <img :src="getImagePath(img)" class="carousel-image" />
+          </div>
+        </a-carousel>
+      </a-modal>
+
+      <!-- 提交按钮 -->
+      <div style="text-align: center; margin-top: 24px;">
+        <a-button v-if="currentPage === totalPages" type="primary" @click="submitForm">submit</a-button>
+      </div>
     </div>
   </div>
 </template>
@@ -47,8 +91,12 @@
 export default {
   data() {
     return {
-      // ratings[图片index][问题index]
-      ratings: Array.from({ length: 4 }, () => Array(4).fill(3)),
+      previewVisible: false,
+      currentIndex: 0,
+      totalImages: 8, 
+      pageSize: 4,    
+      currentPage: 1,
+      ratings: Array.from({ length: 12 }, () => Array(4).fill(3)),
       marks: {
         1: '1',
         2: '2',
@@ -58,26 +106,95 @@ export default {
       },
     };
   },
+  computed: {
+    totalImageNumbers() {
+      return Array.from({ length: this.totalImages }, (_, i) => i + 1);
+    },
+    currentPageImages() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.totalImageNumbers.slice(start, end);
+    },
+    totalPages() {
+      return Math.ceil(this.totalImages / this.pageSize);
+    },
+  },
   methods: {
+    getImagePath(imgNumber) {
+      return require(`@/assets/photo/${imgNumber}.jpg`);
+    },
+    openPreview(imgNumber) {
+      this.currentIndex = imgNumber - 1;
+      this.previewVisible = true;
+      this.$nextTick(() => {
+        this.$refs.carousel.goTo(this.currentIndex, false);
+      });
+    },
+    updateCurrentIndex(index) {
+      this.currentIndex = index;
+    },
+    handlePageChange(page) {
+      this.currentPage = page;
+    },
     submitForm() {
-      console.log('提交的评分:', this.ratings);
-      // 你可以在这里发给后端或进行进一步处理
-      // 示例：this.$axios.post('/api/submit', this.ratings)
+      console.log("提交的评分:", this.ratings);
+      //send to backward
+      axios.post('https://github.com/Zhilan-leo/IL-photography-backend.git',{
+        ratings: this.ratings
+      })
     },
   },
 };
 </script>
 
 <style scoped>
-#components-grid-demo-rating {
-  padding: 24px;
+.description {
+  padding: 16px 24px;
+  margin-bottom: 16px;
+  background-color: #fafafa;
+  border-left: 4px solid #1890ff;
+  font-size: 14px;
+  line-height: 1.6;
 }
-.zoom-image {
+.description p {
+  margin: 4px 0;
+}
+.description ol {
+  padding-left: 20px;
+}
+
+.thumbnail {
   width: 100%;
-  margin-bottom: 12px;
+  height: 150px;
+  object-fit: cover;
+  cursor: pointer;
   transition: transform 0.3s ease;
 }
-.zoom-image:hover {
-  transform: scale(1.1);
+.thumbnail:hover {
+  transform: scale(1.05);
+}
+.carousel-image {
+  width: 100%;
+  height: 400px;
+  object-fit: contain;
+  display: block;
+  margin: auto;
+}
+.slider-column {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.slider-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.question-label {
+  width: 24px;
+  font-weight: 600;
+  margin-right: 8px;
+  text-align: left;
+  user-select: none;
 }
 </style>
