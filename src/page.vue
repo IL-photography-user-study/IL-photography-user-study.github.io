@@ -2,11 +2,12 @@
  * @Author: liaozhilan lzl16975772022@163.com
  * @Date: 2025-06-24 10:12:55
  * @LastEditors: liaozhilan lzl16975772022@163.com
- * @LastEditTime: 2025-06-27 12:26:04
+ * @LastEditTime: 2025-06-27 15:18:03
  * @FilePath: \IL-photography\src\page.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
 <template>
+  
   <div>
     <div class="description">
       <p><strong>Objective：</strong></p>
