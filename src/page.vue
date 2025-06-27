@@ -1,3 +1,11 @@
+<!--
+ * @Author: liaozhilan lzl16975772022@163.com
+ * @Date: 2025-06-24 10:12:55
+ * @LastEditors: liaozhilan lzl16975772022@163.com
+ * @LastEditTime: 2025-06-27 12:26:04
+ * @FilePath: \IL-photography\src\page.vue
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
 <template>
   <div>
     <div class="description">
@@ -23,7 +31,7 @@
         >
           <img
             :src="getImagePath(img)"
-            class="thumbnail"
+            class= "carousel-image" 
             @click="openPreview(img)"
           />
 
@@ -66,6 +74,7 @@
         centered
         @cancel="previewVisible = false"
       >
+        <!--main-->
         <a-carousel
           ref="carousel"
           :dots="false"
@@ -77,11 +86,25 @@
             <img :src="getImagePath(img)" class="carousel-image" />
           </div>
         </a-carousel>
+        
+        <!-- slides -->
+        <div class="thumbnail-bar">
+          <div
+            v-for="img in currentPageImages"
+            :key="'thumb-' + img"
+            class="thumbnail"
+            :class="{ active: img - 1 === currentIndex }"
+            @click="goToSlide(img - 1)"
+          >
+            <img :src="getImagePath(img)" />
+          </div>
+        </div>
       </a-modal>
+      
 
-      <!-- 提交按钮 -->
+      <!-- submit -->
       <div style="text-align: center; margin-top: 24px;">
-        <a-button v-if="currentPage === totalPages" type="primary" @click="submitForm">submit</a-button>
+        <a-button v-if="currentPage === totalPages" type="primary" :loading="isSubmitting" :disabled="isSubmitting" @click="submitForm">submit</a-button>
       </div>
     </div>
   </div>
@@ -90,13 +113,15 @@
 <script>
 export default {
   data() {
+    const total = 24;
     return {
       previewVisible: false,
       currentIndex: 0,
-      totalImages: 8, 
+      totalImages: total, 
       pageSize: 4,    
       currentPage: 1,
-      ratings: Array.from({ length: 8 }, () => Array(4).fill(2)),
+      isSubmitting: false,
+      ratings: Array.from({ length: total }, () => Array(4).fill(1)),
       marks: {
         1: '1',
         2: '2',
@@ -130,6 +155,10 @@ export default {
         this.$refs.carousel.goTo(this.currentIndex, false);
       });
     },
+    goToSlide(index) {
+      this.currentIndex = index;
+      this.$refs.carousel.goTo(index, false);
+    },
     updateCurrentIndex(index) {
       this.currentIndex = index;
     },
@@ -139,12 +168,17 @@ export default {
     
   
     submitForm() {
+      if (this.isSubmitting) return;
+
+      this.isSubmitting = true;
+      const trimmedRatings = this.ratings.slice(0, this.totalImages);
+
       fetch("https://zhilan-leo-il-photography-backward.hf.space/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ ratings: this.ratings })
+        body: JSON.stringify({ ratings: trimmedRatings})//this.ratings 
       })
         .then(response => {
           if (!response.ok) {
@@ -154,15 +188,17 @@ export default {
         })
         .then(data => {
           console.log("submit:", data);
-          this.$message.success("submit successful");
+          this.$router.push("/thanks");
+          //this.$message.success("submit success");
         })
         .catch((err) => {
           console.error("submit error:", err);
           this.$message.error("submit fail");
+        })
+        .finally(() => {
+          this.isSubmitting = false; // 不管成功失败都重置状态
         });
     }
-
-
   },
 };
 </script>
@@ -183,23 +219,45 @@ export default {
   padding-left: 20px;
 }
 
-.thumbnail {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-.thumbnail:hover {
-  transform: scale(1.05);
-}
 .carousel-image {
   width: 100%;
-  height: 400px;
+  aspect-ratio: 16 / 9;
   object-fit: contain;
   display: block;
   margin: auto;
 }
+.thumbnail-bar {
+  display: flex;           /* 横排排列 */
+  flex-wrap: nowrap;       /* 不换行 */
+  overflow-x: auto;        /* 超出横向滚动 */
+  gap: 8px;                /* 缩略图间距 */
+  padding: 4px 0;          /* 上下间距 */
+  margin-top: 16px;        /* 与主图间距 */
+}
+
+.thumbnail {
+  flex: 0 0 auto;
+  width: 120px;
+  height: 67.5px; /* 16:9 = 120 * 9 / 16 */
+  border: 2px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.thumbnail:hover {
+  transform: scale(1.1);
+}
+.thumbnail.active {
+  border-color: #1890ff;
+}
+.thumbnail img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+
 .slider-column {
   display: flex;
   flex-direction: column;
