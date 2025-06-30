@@ -24,104 +24,106 @@
       <p><strong>Tips:</strong> Click images to enlarge. Drag numbers to rank each group under every question.</p>
     </div>
 
-    <div>
-      <!-- 图片展示 + 排序模块：两组 -->
+    <!-- 六组，每行两组，共三行 -->
+    <div v-for="row in 3" :key="'row-' + row">
       <a-row :gutter="16" class="group-wrapper">
-        <a-col :span="12" v-for="groupIdx in 2" :key="groupIdx">
-          <div class="group-title">Group {{ (currentGroup - 1) * 2 + groupIdx }}</div>
-          <a-row :gutter="8">
-            <a-col :span="12" v-for="i in 2" :key="i">
-              <div class="image-container" @click="openPreview(groupIdx, i - 1)">
-                <img :src="getImagePath(groupImages(groupIdx)[i - 1])" class="grid-img" />
-                <div class="img-label">{{ i }}</div>
-              </div>
-            </a-col>
-          </a-row>
-          <a-row :gutter="8">
-            <a-col :span="12" v-for="i in [3, 4]" :key="i">
-              <div class="image-container" @click="openPreview(groupIdx, i - 1)">
-                <img :src="getImagePath(groupImages(groupIdx)[i - 1])" class="grid-img" />
-                <div class="img-label">{{ i }}</div>
-              </div>
-            </a-col>
-          </a-row>
-
-          <!-- 每组对应的排序区 -->
-          <div class="ranking-section" v-for="(list, qIndex) in groupRankings[groupIdx - 1]" :key="groupIdx + '-' + qIndex">
-            <div class="ranking-bar">
-              <span class="ranking-title">Q{{ qIndex + 1 }}</span>
-              <span class="ranking-label">Best</span>
-              <draggable
-                v-model="groupRankings[groupIdx - 1][qIndex]"
-                :options="{ animation: 200 }"
-                class="drag-list"
-                tag="div"
-              >
-                <div v-for="num in groupRankings[groupIdx - 1][qIndex]" :key="num" class="drag-number">
-                  {{ (num % 4 === 0 ? 4 : num % 4) }}
+        <a-col :span="12" v-for="col in 2" :key="'group-' + ((row - 1) * 2 + col)">
+          <template v-if="(row - 1) * 2 + col <= 6">
+            <div class="group-title">Group {{ (currentGroup - 1) * 6 + (row - 1) * 2 + col }}</div>
+            <a-row :gutter="8">
+              <a-col :span="12" v-for="i in 2" :key="i">
+                <div class="image-container" @click="openPreview((row - 1) * 2 + col, i - 1)">
+                  <img :src="getImagePath(groupImages((row - 1) * 2 + col)[i - 1])" class="grid-img" />
+                  <div class="img-label">{{ i }}</div>
                 </div>
-              </draggable>
-              <span class="ranking-label">Worst</span>
+              </a-col>
+            </a-row>
+            <a-row :gutter="8">
+              <a-col :span="12" v-for="i in [3, 4]" :key="i">
+                <div class="image-container" @click="openPreview((row - 1) * 2 + col, i - 1)">
+                  <img :src="getImagePath(groupImages((row - 1) * 2 + col)[i - 1])" class="grid-img" />
+                  <div class="img-label">{{ i }}</div>
+                </div>
+              </a-col>
+            </a-row>
+
+            <!-- 排序 -->
+            <div
+              class="ranking-section"
+              v-for="(list, qIndex) in groupRankings[(row - 1) * 2 + col - 1]"
+              :key="'ranking-' + ((row - 1) * 2 + col) + '-' + qIndex"
+            >
+              <div class="ranking-bar">
+                <span class="ranking-title">Q{{ qIndex + 1 }}</span>
+                <span class="ranking-label">Best</span>
+                <draggable
+                  v-model="groupRankings[(row - 1) * 2 + col - 1][qIndex]"
+                  :options="{ animation: 200 }"
+                  class="drag-list"
+                  tag="div"
+                >
+                  <div
+                    v-for="num in groupRankings[(row - 1) * 2 + col - 1][qIndex]"
+                    :key="num"
+                    class="drag-number"
+                  >
+                    {{ (num % 4 === 0 ? 4 : num % 4) }}
+                  </div>
+                </draggable>
+                <span class="ranking-label">Worst</span>
+              </div>
             </div>
-          </div>
+          </template>
         </a-col>
       </a-row>
-
-      <!-- 分页与提交 -->
-      <div style="text-align: center; margin-top: 24px">
-        <a-pagination
-          :current="currentGroup"
-          :page-size="1"
-          :total="Math.ceil(totalImages / 8)"
-          @change="handleGroupChange"
-          simple
-        />
-        <!-- <a-button
-          v-if="currentGroup === Math.ceil(totalImages / 8)"
-          type="primary"
-          :loading="isSubmitting"
-          @click="submitForm"
-        >Submit</a-button> -->
-      </div> 
-
-      <!-- 图片放大预览 -->
-      <a-modal
-        :visible="previewVisible"
-        :footer="null"
-        :width="800"
-        centered
-        @cancel="previewVisible = false"
-      >
-        <a-carousel ref="carousel" :dots="false" arrows :initial-slide="currentIndex" @afterChange="updateCurrentIndex">
-          <div v-for="(img, idx) in previewGroupImages" :key="img">
-            <img :src="getImagePath(img)" class="carousel-image" />
-            <div class="preview-index">{{ idx + 1 }}</div>
-          </div>
-        </a-carousel>
-
-        <div class="thumbnail-bar">
-          <div
-            v-for="(img, idx) in previewGroupImages"
-            :key="'thumb-' + img"
-            class="thumbnail"
-            :class="{ active: idx === currentIndex }"
-            @click="goToSlide(idx)"
-          >
-            <img :src="getImagePath(img)" />
-          </div>
-        </div>
-      </a-modal>
-
     </div>
-    
+
+    <!-- 分页 -->
+    <div style="text-align: center; margin-top: 24px">
+      <a-pagination
+        :current="currentGroup"
+        :page-size="1"
+        :total="Math.ceil(totalImages / 24)"
+        @change="handleGroupChange"
+        simple
+      />
+    </div>
+
+    <!-- 图片放大预览 -->
+    <a-modal
+      :visible="previewVisible"
+      :footer="null"
+      :width="800"
+      centered
+      @cancel="previewVisible = false"
+    >
+      <a-carousel ref="carousel" :dots="false" arrows :initial-slide="currentIndex" @afterChange="updateCurrentIndex">
+        <div v-for="(img, idx) in previewGroupImages" :key="img">
+          <img :src="getImagePath(img)" class="carousel-image" />
+          <div class="preview-index">{{ idx + 1 }}</div>
+        </div>
+      </a-carousel>
+
+      <div class="thumbnail-bar">
+        <div
+          v-for="(img, idx) in previewGroupImages"
+          :key="'thumb-' + img"
+          class="thumbnail"
+          :class="{ active: idx === currentIndex }"
+          @click="goToSlide(idx)"
+        >
+          <img :src="getImagePath(img)" />
+        </div>
+      </div>
+    </a-modal>
+
     <!-- submit -->
     <div style="text-align: center; margin-top: 24px;">
-      <a-button v-if="currentGroup === Math.ceil(totalImages / 8)" type="primary" :loading="isSubmitting" :disabled="isSubmitting" @click="submitForm">submit</a-button>
+      <a-button v-if="currentGroup === Math.ceil(totalImages / 24)" type="primary" :loading="isSubmitting" :disabled="isSubmitting" @click="submitForm">submit</a-button>
     </div>
-    
   </div>
-  
 </template>
+
 
 <script>
 import draggable from "vuedraggable";
@@ -151,7 +153,7 @@ export default {
       return require(`@/assets/photo/${n}.jpg`);
     },
     groupImages(groupIdx) {
-      const base = (this.currentGroup - 1) * 8 + (groupIdx - 1) * 4;
+      const base = (this.currentGroup - 1) * 24 + (groupIdx - 1) * 4;//*8
       return Array.from({ length: 4 }, (_, i) => base + i + 1);
     },
     openPreview(groupIdx, index) {
@@ -172,8 +174,11 @@ export default {
       this.initRankings();
     },
     initRankings() {
-      const base = (this.currentGroup - 1) * 8;
-      this.groupRankings = [0, 1].map(i =>
+      const base = (this.currentGroup - 1) * 24;//*8
+      // this.groupRankings = [0, 1].map(i =>
+      //   Array(4).fill(0).map(() => [base + i * 4 + 1, base + i * 4 + 2, base + i * 4 + 3, base + i * 4 + 4])
+      // );
+      this.groupRankings = Array.from({ length: 6 }, (_, i) =>
         Array(4).fill(0).map(() => [base + i * 4 + 1, base + i * 4 + 2, base + i * 4 + 3, base + i * 4 + 4])
       );
     },
@@ -244,13 +249,37 @@ export default {
 .tips-bar p {
   margin: 0;
 }
-.group-title {
+/* .group-title {
   font-weight: bold;
   margin: 12px 0 8px;
+} */
+ /* 每行（两组）的外层行距 */
+.group-wrapper {
+  margin-bottom: 32px;
 }
+
+/* 每个组的卡片风格 */
+.group-card {
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin: 12px 0;
+}
+
+/* 组内标题加大间距 */
+.group-title {
+  font-weight: bold;
+  margin: 12px 0 12px;
+  font-size: 16px;
+}
+
+
 .image-container {
   position: relative;
   cursor: pointer;
+  margin-bottom: 8px;
 }
 .grid-img {
   width: 100%;
@@ -269,8 +298,11 @@ export default {
   border-radius: 4px;
 }
 .ranking-section {
-  margin: 12px auto;
-  max-width: 480px;
+  /* margin: 12px auto;
+  max-width: 480px; */
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed #d0d0d0;
 }
 .ranking-title {
   font-weight: bold;
