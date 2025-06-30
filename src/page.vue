@@ -171,10 +171,12 @@ export default {
     },
     handleGroupChange(p) {
       this.currentGroup = p;
-      this.initRankings();
+      // this.initRankings();
     },
     initRankings() {
-      // const base = (this.currentGroup - 1) * 24;//*8
+      if (this.groupRankings.length > 0) return; 
+      // const base = 
+      // (this.currentGroup - 1) * 24;//*8
       // // this.groupRankings = [0, 1].map(i =>
       // //   Array(4).fill(0).map(() => [base + i * 4 + 1, base + i * 4 + 2, base + i * 4 + 3, base + i * 4 + 4])
       // // );
