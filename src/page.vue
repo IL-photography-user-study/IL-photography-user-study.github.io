@@ -1,35 +1,31 @@
 <template>
   <div>
-    <!-- Header -->
     <header>
       <h1 class="title">Fotobot: Flow Matching Policies for Autonomous Portrait Photography Robot</h1>
       <h2 class="subtitle">Anonymous Questionnaire for Aesthetic Assessment</h2>
     </header>
 
-    <!-- Description -->
     <div class="description">
-      <p><strong>Objective:</strong></p>
-      <p>To evaluate the quality of photographic works from multiple dimensions.</p>
+      <p><strong>Objective:</strong> To evaluate the quality of photographic works from multiple dimensions.</p>
       <p><strong>Questionnaire:</strong></p>
       <ol>
-        <li>How well is the image composited? (comply with rules of thirds, balancing elements, or symmetry)</li>
-        <li>How well is the main subject emphasized in the image?</li>
-        <li>How well does the image highlight the relation between the character and the background?</li>
-        <li>How well does the image have the sense of telling stories?</li>
+        <li>How well is the image composited?</li>
+        <li>How well is the main subject emphasized?</li>
+        <li>How well does the image highlight the relation between character and background?</li>
+        <li>How well does the image tell a story?</li>
       </ol>
     </div>
 
-    <!-- Tips栏 -->
     <div class="tips-bar">
       <p><strong>Tips:</strong> Click images to enlarge. Drag numbers to rank each group under every question.</p>
     </div>
 
-    <!-- 六组，每行两组，共三行 -->
     <div v-for="row in 3" :key="'row-' + row">
       <a-row :gutter="16" class="group-wrapper">
         <a-col :span="12" v-for="col in 2" :key="'group-' + ((row - 1) * 2 + col)">
           <template v-if="(row - 1) * 2 + col <= 6">
             <div class="group-title">Group {{ (currentGroup - 1) * 6 + (row - 1) * 2 + col }}</div>
+
             <a-row :gutter="8">
               <a-col :span="12" v-for="i in 2" :key="i">
                 <div class="image-container" @click="openPreview((row - 1) * 2 + col, i - 1)">
@@ -38,6 +34,7 @@
                 </div>
               </a-col>
             </a-row>
+
             <a-row :gutter="8">
               <a-col :span="12" v-for="i in [3, 4]" :key="i">
                 <div class="image-container" @click="openPreview((row - 1) * 2 + col, i - 1)">
@@ -47,28 +44,18 @@
               </a-col>
             </a-row>
 
-            <!-- 排序 v-model="groupRankings[(row - 1) * 2 + col - 1][qIndex]"-->
-            <div
-              class="ranking-section"
-              v-for="(list, qIndex) in groupRankings[(row - 1) * 2 + col - 1]"
-              :key="'ranking-' + ((row - 1) * 2 + col) + '-' + qIndex"
-            >
+            <div v-for="qIndex in 4" :key="'ranking-' + ((row - 1) * 2 + col) + '-' + qIndex" class="ranking-section">
               <div class="ranking-bar">
-                <span class="ranking-title">Q{{ qIndex + 1 }}</span>
+                <span class="ranking-title">Q{{ qIndex }}</span>
                 <span class="ranking-label">Best</span>
                 <draggable
-                  :list="groupRankings[groupIdx - 1][qIndex]"
-                  @change="onRankingChange($event, groupIdx - 1, qIndex)"
-                  
+                  :list="groupRankings[(row - 1) * 2 + col - 1][qIndex - 1]"
+                  @change="onRankingChange($event, (row - 1) * 2 + col - 1, qIndex - 1)"
                   :options="{ animation: 200 }"
                   class="drag-list"
                   tag="div"
                 >
-                  <div
-                    v-for="num in groupRankings[(row - 1) * 2 + col - 1][qIndex]"
-                    :key="num"
-                    class="drag-number"
-                  >
+                  <div v-for="num in groupRankings[(row - 1) * 2 + col - 1][qIndex - 1]" :key="num" class="drag-number">
                     {{ (num % 4 === 0 ? 4 : num % 4) }}
                   </div>
                 </draggable>
@@ -80,7 +67,6 @@
       </a-row>
     </div>
 
-    <!-- 分页 -->
     <div style="text-align: center; margin-top: 24px">
       <a-pagination
         :current="currentGroup"
@@ -91,14 +77,7 @@
       />
     </div>
 
-    <!-- 图片放大预览 -->
-    <a-modal
-      :visible="previewVisible"
-      :footer="null"
-      :width="800"
-      centered
-      @cancel="previewVisible = false"
-    >
+    <a-modal :visible="previewVisible" :footer="null" :width="800" centered @cancel="previewVisible = false">
       <a-carousel ref="carousel" :dots="false" arrows :initial-slide="currentIndex" @afterChange="updateCurrentIndex">
         <div v-for="(img, idx) in previewGroupImages" :key="img">
           <img :src="getImagePath(img)" class="carousel-image" />
@@ -119,13 +98,13 @@
       </div>
     </a-modal>
 
-    <!-- submit -->
     <div style="text-align: center; margin-top: 24px;">
-      <a-button v-if="currentGroup === Math.ceil(totalImages / 24)" type="primary" :loading="isSubmitting" :disabled="isSubmitting" @click="submitForm">submit</a-button>
+      <a-button v-if="currentGroup === Math.ceil(totalImages / 24)" type="primary" :loading="isSubmitting" @click="submitForm">
+        Submit
+      </a-button>
     </div>
   </div>
 </template>
-
 
 <script>
 import draggable from "vuedraggable";
@@ -143,28 +122,19 @@ export default {
       groupRankings: []
     };
   },
-  computed: {
-    currentGroupImages() {
-      const base = (this.currentGroup - 1) * 8;
-      return Array.from({ length: 8 }, (_, i) => base + i + 1);
-    },
-    
-  },
   methods: {
     getImagePath(n) {
       return require(`@/assets/photo/${n}.jpg`);
     },
     groupImages(groupIdx) {
-      const base = (this.currentGroup - 1) * 24 + (groupIdx - 1) * 4;//*8
+      const base = (this.currentGroup - 1) * 24 + (groupIdx - 1) * 4;
       return Array.from({ length: 4 }, (_, i) => base + i + 1);
     },
-    /////
-    onRankingChange(event, groupIdx, qIndex) {
-      this.$set(this.groupRankings[groupIdx], qIndex, [...event.to.children].map(el => {
-        return parseInt(el.textContent.trim());
-      }));
+    onRankingChange(evt, groupIdx, qIndex) {
+      // VueDraggable 自动处理排序更新
+      const newOrder = [...this.groupRankings[groupIdx][qIndex]];
+      this.$set(this.groupRankings[groupIdx], qIndex, newOrder);
     },
-    /////
     openPreview(groupIdx, index) {
       this.previewGroupImages = this.groupImages(groupIdx);
       this.currentIndex = index;
@@ -180,48 +150,25 @@ export default {
     },
     handleGroupChange(p) {
       this.currentGroup = p;
-      // this.initRankings();
     },
     initRankings() {
-      if (this.groupRankings.length > 0) return; 
-      // const base = 
-      // (this.currentGroup - 1) * 24;//*8
-      // // this.groupRankings = [0, 1].map(i =>
-      // //   Array(4).fill(0).map(() => [base + i * 4 + 1, base + i * 4 + 2, base + i * 4 + 3, base + i * 4 + 4])
-      // // );
-      // this.groupRankings = Array.from({ length: 6 }, (_, i) =>
-      //   Array(4).fill(0).map(() => [base + i * 4 + 1, base + i * 4 + 2, base + i * 4 + 3, base + i * 4 + 4])
-      // );
-      const totalGroups = this.totalImages / 4; // 每 4 张图一组
+      if (this.groupRankings.length > 0) return;
+      const totalGroups = this.totalImages / 4;
       this.groupRankings = Array.from({ length: totalGroups }, (_, i) =>
-        Array(4).fill(0).map(() => [
-          i * 4 + 1,
-          i * 4 + 2,
-          i * 4 + 3,
-          i * 4 + 4
-        ])
+        Array.from({ length: 4 }, () => [i * 4 + 1, i * 4 + 2, i * 4 + 3, i * 4 + 4])
       );
     },
     submitForm() {
       this.isSubmitting = true;
-      // ////
-      // const base = (this.currentGroup - 1) * 24;
-
       const payload = {
         groups: this.groupRankings.map((rankings, i) => ({
           groupIndex: i + 1,
           rankings
         }))
       };
-      // ////
-
       fetch("https://zhilan-leo-il-photography-backward.hf.space/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // body: JSON.stringify({
-        //   group: this.currentGroup,
-        //   groupRankings: this.groupRankings
-        // })
         body: JSON.stringify(payload)
       })
         .then(response => {
@@ -244,6 +191,8 @@ export default {
   }
 };
 </script>
+
+
 
 <style scoped>
 .title {
