@@ -44,18 +44,26 @@
               </a-col>
             </a-row>
 
-            <div v-for="qIndex in 4" :key="'ranking-' + ((row - 1) * 2 + col) + '-' + qIndex" class="ranking-section">
+            <div
+              class="ranking-section"
+              v-for="(list, qIndex) in groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1]"
+              :key="'ranking-' + ((row - 1) * 2 + col) + '-' + qIndex"
+            >
               <div class="ranking-bar">
-                <span class="ranking-title">Q{{ qIndex }}</span>
+                <span class="ranking-title">Q{{ qIndex + 1 }}</span>
                 <span class="ranking-label">Best</span>
                 <draggable
-                  :list="groupRankings[(row - 1) * 2 + col - 1][qIndex - 1]"
-                  @change="onRankingChange($event, (row - 1) * 2 + col - 1, qIndex - 1)"
+                  :list="groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
+                  @update="event => onRankingChange(event, (currentGroup - 1) * 6 + (row - 1) * 2 + col - 1, qIndex)"
                   :options="{ animation: 200 }"
                   class="drag-list"
                   tag="div"
                 >
-                  <div v-for="num in groupRankings[(row - 1) * 2 + col - 1][qIndex - 1]" :key="num" class="drag-number">
+                  <div
+                    v-for="num in groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
+                    :key="num"
+                    class="drag-number"
+                  >
                     {{ (num % 4 === 0 ? 4 : num % 4) }}
                   </div>
                 </draggable>
@@ -130,10 +138,10 @@ export default {
       const base = (this.currentGroup - 1) * 24 + (groupIdx - 1) * 4;
       return Array.from({ length: 4 }, (_, i) => base + i + 1);
     },
-    onRankingChange(evt, groupIdx, qIndex) {
-      // VueDraggable 自动处理排序更新
-      const newOrder = [...this.groupRankings[groupIdx][qIndex]];
-      this.$set(this.groupRankings[groupIdx], qIndex, newOrder);
+    onRankingChange(event, groupIdx, qIndex) {
+      const elOrder = [...event.to.children].map(el => parseInt(el.textContent.trim()));
+      const base = (this.currentGroup - 1) * 24 + groupIdx * 4;
+      this.$set(this.groupRankings[groupIdx], qIndex, elOrder.map(n => base + ((n + 3) % 4)));
     },
     openPreview(groupIdx, index) {
       this.previewGroupImages = this.groupImages(groupIdx);
@@ -191,6 +199,7 @@ export default {
   }
 };
 </script>
+
 
 
 
