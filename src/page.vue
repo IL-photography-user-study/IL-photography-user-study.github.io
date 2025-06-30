@@ -5,7 +5,7 @@
       <h2 class="subtitle">Anonymous Questionnaire for Aesthetic Assessment</h2>
     </header>
 
-    <div class="description">
+    <div class="description" ref="questionIntro">
       <p><strong>Objective:</strong> To evaluate the quality of photographic works from multiple dimensions.</p>
       <p><strong>Questionnaire:</strong></p>
       <ol>
@@ -17,12 +17,13 @@
     </div>
 
     <div class="tips-bar">
-      <p><strong>Tips:</strong> Click images to enlarge. Drag numbers to rank each group under every question.</p>
+      <p><strong>Tips:</strong> Click images to enlarge. Drag numbers to rank each group's 4 images per question.</p>
     </div>
 
     <div v-for="row in 3" :key="'row-' + row">
-      <a-row :gutter="16" class="group-wrapper">
+      <a-row :gutter="32" class="group-wrapper">
         <a-col 
+          class="group-col"
           :xs="24"
           :sm="24"
           :md="12"
@@ -35,7 +36,7 @@
           <template v-if="(row - 1) * 2 + col <= 6">
             <div class="group-title">Group {{ (currentGroup - 1) * 6 + (row - 1) * 2 + col }}</div>
 
-            <a-row :gutter="8">
+            <a-row :gutter="12">
               <a-col :span="12" v-for="i in 2" :key="i">
                 <div class="image-container" @click="openPreview((row - 1) * 2 + col, i - 1)">
                   <img :src="getImagePath(groupImages((row - 1) * 2 + col)[i - 1])" class="grid-img" />
@@ -44,7 +45,7 @@
               </a-col>
             </a-row>
 
-            <a-row :gutter="8">
+            <a-row :gutter="12">
               <a-col :span="12" v-for="i in [3, 4]" :key="i">
                 <div class="image-container" @click="openPreview((row - 1) * 2 + col, i - 1)">
                   <img :src="getImagePath(groupImages((row - 1) * 2 + col)[i - 1])" class="grid-img" />
@@ -169,6 +170,12 @@ export default {
     },
     handleGroupChange(p) {
       this.currentGroup = p;
+      this.$nextTick(() => {
+        const intro = this.$refs.questionIntro;
+        if (intro && intro.scrollIntoView) {
+          intro.scrollIntoView({ behavior: "smooth" });
+        }
+      });
     },
     initRankings() {
       if (this.groupRankings.length > 0) return;
@@ -227,7 +234,7 @@ export default {
   margin-bottom: 20px;
 }
 .description {
-  padding: 16px 24px;
+  padding: 24px 24px;
   margin-bottom: 16px;
   background-color: #fafafa;
   border-left: 4px solid #1890ff;
@@ -246,20 +253,24 @@ export default {
   background: #e6f7ff;
   padding: 5px;
   border: 1px solid #91d5ff;
+  margin: 0 8px 5px; 
 }
 .tips-bar p {
-  margin: 0;
-}
-/* .group-title {
-  font-weight: bold;
-  margin: 12px 0 8px;
-} */
- /* 每行（两组）的外层行距 */
-.group-wrapper {
-  margin-bottom: 32px;
+  margin: 0 ;
 }
 
-/* 每个组的卡片风格 */
+ /* 每行（两组）的外层行距 */
+.group-wrapper {
+  padding: 5px 32px;
+  margin-bottom: 32px;
+}
+@media (max-width: 768px) {
+  .group-wrapper .group-col:nth-child(2) {
+    margin-top: 32px;
+  }
+}
+
+
 .group-card {
   padding: 16px;
   border: 1px solid #e0e0e0;
@@ -280,7 +291,7 @@ export default {
 .image-container {
   position: relative;
   cursor: pointer;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 .grid-img {
   width: 100%;
@@ -313,7 +324,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
-  justify-content: flex-start;
+  justify-content: center;
   flex-wrap: wrap;
 }
 .ranking-label {
