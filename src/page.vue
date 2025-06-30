@@ -325,7 +325,8 @@ export default {
   align-items: center;
   gap: 12px;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto; 
 }
 .ranking-label {
   font-size: 14px;
@@ -338,6 +339,10 @@ export default {
   gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
+
+  flex-shrink: 1;            /* 允许收缩以适应空间 */
+  flex-grow: 1;              /* 允许拉伸 */
+  min-width: 0;              /* 防止flex item超出 */
 }
 .drag-number {
   width: 40px;
