@@ -184,13 +184,25 @@ export default {
     },
     submitForm() {
       this.isSubmitting = true;
+      // ////
+      const base = (this.currentGroup - 1) * 24;
+
+      const payload = {
+        groups: this.groupRankings.map((rankings, i) => ({
+          groupIndex: base + i + 1,
+          rankings
+        }))
+      };
+      // ////
+
       fetch("https://zhilan-leo-il-photography-backward.hf.space/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          group: this.currentGroup,
-          groupRankings: this.groupRankings
-        })
+        // body: JSON.stringify({
+        //   group: this.currentGroup,
+        //   groupRankings: this.groupRankings
+        // })
+        body: JSON.stringify(payload)
       })
         .then(response => {
           if (!response.ok) throw new Error("Network response was not ok");
