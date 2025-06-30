@@ -63,11 +63,13 @@
                 <span class="ranking-label">Best</span>
                 <draggable
                   :list="groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
-                  @update="event => onRankingChange(event, (currentGroup - 1) * 6 + (row - 1) * 2 + col - 1, qIndex)"
+                  @change="onRankingChange"
                   :options="{ animation: 200 }"
                   class="drag-list"
                   tag="div"
                 >
+                <!-- @update="event => onRankingChange(event, (currentGroup - 1) * 6 + (row - 1) * 2 + col - 1, qIndex)"
+                  -->
                   <div
                     v-for="num in groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
                     :key="num"
