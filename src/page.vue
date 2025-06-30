@@ -318,12 +318,12 @@ export default {
 }
 .ranking-title {
   font-weight: bold;
-  margin-right: 8px;
+  margin-right: 6px; /* */
 }
 .ranking-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
   justify-content: center;
   flex-wrap: nowrap;
   overflow-x: auto; 
@@ -331,12 +331,12 @@ export default {
 .ranking-label {
   font-size: 14px;
   color: #999;
-  min-width: 40px;
+  min-width: 12px;
   text-align: center;
 }
 .drag-list {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   justify-content: center;
   flex-wrap: wrap;
 
