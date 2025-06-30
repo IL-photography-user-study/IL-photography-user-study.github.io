@@ -174,22 +174,31 @@ export default {
       this.initRankings();
     },
     initRankings() {
-      const base = (this.currentGroup - 1) * 24;//*8
-      // this.groupRankings = [0, 1].map(i =>
+      // const base = (this.currentGroup - 1) * 24;//*8
+      // // this.groupRankings = [0, 1].map(i =>
+      // //   Array(4).fill(0).map(() => [base + i * 4 + 1, base + i * 4 + 2, base + i * 4 + 3, base + i * 4 + 4])
+      // // );
+      // this.groupRankings = Array.from({ length: 6 }, (_, i) =>
       //   Array(4).fill(0).map(() => [base + i * 4 + 1, base + i * 4 + 2, base + i * 4 + 3, base + i * 4 + 4])
       // );
-      this.groupRankings = Array.from({ length: 6 }, (_, i) =>
-        Array(4).fill(0).map(() => [base + i * 4 + 1, base + i * 4 + 2, base + i * 4 + 3, base + i * 4 + 4])
+      const totalGroups = this.totalImages / 4; // 每 4 张图一组
+      this.groupRankings = Array.from({ length: totalGroups }, (_, i) =>
+        Array(4).fill(0).map(() => [
+          i * 4 + 1,
+          i * 4 + 2,
+          i * 4 + 3,
+          i * 4 + 4
+        ])
       );
     },
     submitForm() {
       this.isSubmitting = true;
       // ////
-      const base = (this.currentGroup - 1) * 24;
+      // const base = (this.currentGroup - 1) * 24;
 
       const payload = {
         groups: this.groupRankings.map((rankings, i) => ({
-          groupIndex: base + i + 1,
+          groupIndex: i + 1,
           rankings
         }))
       };
