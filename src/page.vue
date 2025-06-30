@@ -47,7 +47,7 @@
               </a-col>
             </a-row>
 
-            <!-- 排序 -->
+            <!-- 排序 v-model="groupRankings[(row - 1) * 2 + col - 1][qIndex]"-->
             <div
               class="ranking-section"
               v-for="(list, qIndex) in groupRankings[(row - 1) * 2 + col - 1]"
@@ -57,7 +57,9 @@
                 <span class="ranking-title">Q{{ qIndex + 1 }}</span>
                 <span class="ranking-label">Best</span>
                 <draggable
-                  v-model="groupRankings[(row - 1) * 2 + col - 1][qIndex]"
+                  :list="groupRankings[groupIdx - 1][qIndex]"
+                  @change="onRankingChange($event, groupIdx - 1, qIndex)"
+                  
                   :options="{ animation: 200 }"
                   class="drag-list"
                   tag="div"
@@ -156,6 +158,13 @@ export default {
       const base = (this.currentGroup - 1) * 24 + (groupIdx - 1) * 4;//*8
       return Array.from({ length: 4 }, (_, i) => base + i + 1);
     },
+    /////
+    onRankingChange(event, groupIdx, qIndex) {
+      this.$set(this.groupRankings[groupIdx], qIndex, [...event.to.children].map(el => {
+        return parseInt(el.textContent.trim());
+      }));
+    },
+    /////
     openPreview(groupIdx, index) {
       this.previewGroupImages = this.groupImages(groupIdx);
       this.currentIndex = index;
