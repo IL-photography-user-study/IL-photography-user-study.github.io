@@ -17,7 +17,7 @@
     </div>
 
     <div class="tips-bar">
-      <p><strong>Tips:</strong> Click images to enlarge. Drag numbers to rank each group's 4 images per question.</p>
+      <p><strong>Tips:</strong> Click images to enlarge. Drag numbers to rank each group's 4 images per question. On desktop, double click (hold the second); on mobile, press and hold.</p>
     </div>
 
     <div v-for="row in 3" :key="'row-' + row">
