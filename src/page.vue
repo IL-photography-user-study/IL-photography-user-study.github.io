@@ -2,7 +2,10 @@
   <div>
     <header>
       <h1 class="title">Fotobot: Flow Matching Policies for Autonomous Portrait Photography Robot</h1>
-      <h2 class="subtitle">Anonymous Questionnaire for Aesthetic Assessment</h2>
+      <h2 class="subtitle">
+        <img src="@/assets/group.png" style="width:24px; height:24px; vertical-align: middle; margin-right: 8px;">
+        Anonymous Questionnaire for Aesthetic Assessment
+      </h2>
     </header>
 
     <div class="description" ref="questionIntro">
