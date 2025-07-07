@@ -10,6 +10,7 @@
 
     <div class="description" ref="questionIntro">
       <p><strong>Objective:</strong> To evaluate the quality of photographic works from multiple dimensions.</p>
+      <p><strong>Note:</strong> For each question, please drag to rank all 4 images, and rate only the 4th image separately.</p>
       <p><strong>Questionnaire:</strong></p>
       <ol>
         <li>How well is the image composited?</li>
@@ -20,7 +21,8 @@
     </div>
 
     <div class="tips-bar">
-      <p><strong>Tips:</strong> Click images to enlarge. Drag numbers to rank each group's 4 images per question. On desktop, double click (hold the second); on mobile, press and hold.</p>
+      <p><strong>Tips:</strong> Click images to enlarge. Drag numbers to rank each group's 4 images per question. On desktop, double click (hold the second); 
+        on mobile, press and hold or double click (hold the second)</p>
     </div>
 
     <div v-for="row in 3" :key="'row-' + row">
@@ -62,8 +64,10 @@
               v-for="(list, qIndex) in groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1]"
               :key="'ranking-' + ((row - 1) * 2 + col) + '-' + qIndex"
             >
+              <!-- move Q here -->
+              <span class="ranking-title">Q{{ qIndex + 1 }}</span>
               <div class="ranking-bar">
-                <span class="ranking-title">Q{{ qIndex + 1 }}</span>
+                
                 <span class="ranking-label">Best</span>
                 <draggable
                   :list="groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
@@ -83,8 +87,45 @@
                   </div>
                 </draggable>
                 <span class="ranking-label">Worst</span>
+
               </div>
+
+              <!-- Add score for this Q -->
+              <br />
+              <div>
+                <a-row>
+                  <a-col :span="8" class="flex-center">
+                    <span class="rating-text">Please rate the 4th image here:</span>
+                  </a-col>
+                  <a-col :span="7" class="flex-center">
+                    <!-- <a-slider v-model="inputValue1" :min="1" :max="5" style="width: 100%; marginLeft: 16px; justify-content: center;"/> -->
+                    <a-slider
+                      v-model="groupRatings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
+                      :min="1"
+                      :max="5"
+                      style="width: 100%; margin-left: 16px; justify-content: center;"
+                    />
+                  </a-col>
+                  <a-col :span="4" class="flex-center">
+                    <!-- <a-input-number v-model="inputValue1" :min="1" :max="5" style="marginLeft: 16px" /> -->
+                    <a-input-number
+                      v-model="groupRatings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
+                      :min="1"
+                      :max="5"
+                      style="margin-left: 16px"
+                    />
+                  </a-col>
+                </a-row>
+                    
+              </div>
+
             </div>
+
+
+            
+
+            
+
           </template>
         </a-col>
       </a-row>
@@ -141,8 +182,11 @@ export default {
       previewVisible: false,
       currentIndex: 0,
       previewGroupImages: [],
+      inputValue: 0,
+      inputValue1: 1,
       isSubmitting: false,
-      groupRankings: []
+      groupRankings: [],
+      groupRatings: []
     };
   },
   methods: {
@@ -186,13 +230,20 @@ export default {
       this.groupRankings = Array.from({ length: totalGroups }, (_, i) =>
         Array.from({ length: 4 }, () => [i * 4 + 1, i * 4 + 2, i * 4 + 3, i * 4 + 4])
       );
+      // add ratings
+      this.groupRatings = Array.from({ length: totalGroups }, () =>
+        Array.from({ length: 4 }, () => 0) // 默认评分0分（或其他）
+      );
+
     },
     submitForm() {
       this.isSubmitting = true;
       const payload = {
         groups: this.groupRankings.map((rankings, i) => ({
           groupIndex: i + 1,
-          rankings
+          rankings,
+          // add ratings
+          ratings:this.groupRatings[i]
         }))
       };
       fetch("https://zhilan-leo-il-photography-backward.hf.space/submit", {
@@ -365,6 +416,24 @@ export default {
   object-fit: contain;
   position: relative;
 }
+
+
+.flex-center {
+  display: flex;
+  align-items: center;   /* 垂直居中 */
+  height: 100%;
+}
+.rating-text {
+  font-size: 14px;
+  color: #999;
+  /* min-width: 12px;
+  display: block;      
+  margin-top: 8px;
+  text-align: left; */
+} 
+
+
+
 .preview-index {
   position: absolute;
   top: 12px;
