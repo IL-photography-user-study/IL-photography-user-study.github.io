@@ -10,7 +10,17 @@
 
     <div class="description" ref="questionIntro">
       <p><strong>Objective:</strong> To evaluate the quality of photographic works from multiple dimensions.</p>
-      <p><strong>Note:</strong> For each question, drag to rank all 4 images in the first step, and rate only the designated image individually in the second step.</p>
+      <p><strong>Note:</strong></p>
+      <ol>
+        <li>
+          Use the dropdown selector under each image to assign its rank. 
+          <p>- Multiple images can share the same rank. </p>
+          <p>- After tied ranks, the next rank skips the occupied positions.</p>
+        </li>
+        <li>
+          Use the slider to score each designated image. 
+        </li>
+      </ol>
       <p><strong>Questionnaire:</strong></p>
       <ol>
         <li>How well is the image composited?</li>
@@ -21,8 +31,31 @@
     </div>
 
     <div class="tips-bar">
-      <p><strong>Tips:</strong> Click images to enlarge. In the first step, drag the numbers to rank each group of four photos. In the second step, drag the slider to score the photos. On desktop, double click (hold the second); 
-        on mobile, press and hold or double click (hold the second)</p>
+      <p><strong>Tips:</strong> Click images to enlarge. In the second step, click the slider to activate it and assign a value.</p>
+    </div>
+
+    <!-- username -->
+    <div>
+      <a-modal 
+      v-model="visible" 
+      title="Please enter your name" 
+      :closable="false" 
+      :maskClosable="false" 
+      :keyboard="false" 
+      
+      @ok="handleOk">
+        <div class="components-input-demo-presuffix">
+          <a-input v-model="userName" placeholder="" @pressEnter="handleOk">
+            <a-icon slot="prefix" type="user" />
+            <a-tooltip slot="suffix" title="Please enter your name">
+              <a-icon type="info-circle" style="color: rgba(0,0,0,.45)" />
+            </a-tooltip>
+          </a-input>
+        </div>
+        <template #footer>
+          <a-button type="primary" @click="handleOk">ok</a-button>
+        </template>
+      </a-modal>
     </div>
 
     <br>
@@ -31,24 +64,12 @@
         <a-step v-for="item in steps" :key="item.title" :title="item.title" />
       </a-steps>
     </div>
-    <div class="steps-content" v-if="current === 0" >
-      <div v-for="row in 3" :key="'row-' + row">
-        <a-row :gutter="32" class="group-wrapper">
-          <a-col 
-            class="group-col"
-            :xs="24"
-            :sm="24"
-            :md="12"
-            :lg="12"
-            :xl="12"
-            :xxl="12" 
-            v-for="col in 2" 
-            :key="'group-' + ((row - 1) * 2 + col)"
-          >
-            <template v-if="(currentGroup - 1) * 6 + (row - 1) * 2 + col <= totalGroups">
-            <!-- <template v-if="(row - 1) * 2 + col <= 6"> -->
-              <!-- <div class="group-title">Group {{ (currentGroup - 1) * 6 + (row - 1) * 2 + col }}</div> -->
 
+    <div class="steps-content" v-if="current === 0" >
+      <div v-for="row in 4" :key="'row-' + row">
+        <a-row :gutter="32" class="group-wrapper">
+          <a-col class="group-col" :xs="24" :sm="24" :md="12" :lg="12" :xl="12" :xxl="12" v-for="col in 2" :key="'group-' + ((row - 1) * 2 + col)">
+            <template v-if="(currentGroup - 1) * 8 + (row - 1) * 2 + col <= totalGroups">
               <a-row :gutter="12">
                 <a-col :span="12" v-for="i in 2" :key="i">
                   <div class="image-container" @click="openPreview((row - 1) * 2 + col, i - 1)">
@@ -69,71 +90,78 @@
 
               <div
                 class="ranking-section"
-                v-for="(list, qIndex) in groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1]"
+                v-for="(list, qIndex) in groupRankings[(currentGroup - 1) * 8 + (row - 1) * 2 + col - 1]"
                 :key="'ranking-' + ((row - 1) * 2 + col) + '-' + qIndex"
               >
-                <!-- move Q here -->
-                <span class="ranking-title">Q{{ qIndex + 1 }}</span>
-                <div class="ranking-bar">
-                  
-                  <span class="ranking-label">Best</span>
-                  <!-- <draggable
-                    :list="groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
-                    
-                    @change="event => onRankingChange(event, (currentGroup - 1) * 6 + (row - 1) * 2 + col - 1, qIndex)"
-
-                    :options="{ animation: 200 }"
-                    class="drag-list"
-                    tag="div"
-                  >
-                  
-                    <div
-                      v-for="num in groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
-                      :key="num"
-                      class="drag-number"
-                    >
-                      {{ num }}
+                <!-- move Question here -->
+                <span class="ranking-title">Q{{ qIndex + 1 }} (Choose the ranking for each image below)</span>
+                <div class="ranking-table" style="display: table; margin: 0 auto;">
+                  <!-- 表头：Image 1,2,3,4 -->
+                  <div class="ranking-header" style="display: table-row;">
+                    <div v-for="n in list.length" :key="'header-' + n"
+                        style="display: table-cell; text-align: center; padding: 4px;">
+                      Image {{ n }}
                     </div>
-                  </draggable> -->
-                  <draggable
-                    :list="groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
-                    @change="event => onRankingChange(event, (currentGroup - 1) * 6 + (row - 1) * 2 + col - 1, qIndex)"
-                    :options="{ animation: 200 }"
-                    class="drag-list"
-                    tag="div"
-                  >
-                    <div
-                      v-for="num in groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
-                      :key="num"
-                      class="drag-number"
-                    >
-                      <!-- 显示成 1-4，而不是 num 本身 -->
-                      {{ groupOrders[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1].indexOf(num) + 1 }}
+                  </div>
+                  <!-- 表格行：下拉框 -->
+                  <div class="ranking-row" style="display: table-row;">
+                    <div v-for="item in list" :key="'select-' + item.img"
+                        style="display: table-cell; text-align: center; padding: 4px;">
+                      <a-select
+                        v-model="item.rank"
+                        style="width: 70px"
+                        :placeholder="'Select rank'"
+                        :options="rankOptions"
+                      />
                     </div>
-                  </draggable>
-
-
-                  <span class="ranking-label">Worst</span>
-
-                </div>
+                  </div>
+                  <!-- <div class="ranking-row" style="display: flex; gap: 12px; justify-content: center;">
+                    <div v-for="item in list" :key="item.img" class="ranking-cell">
+                      <a-select
+                        v-model="item.rank"
+                        style="width: 70px"
+                        
+                        :options="rankOptions"
+                      >
+                      </a-select>
+                    </div>
+                  </div> -->
+                </div>  
               </div>
             </template>
+
+            <!-- Comments -->
+            <div class="ranking-comment">
+              <br>
+              <a-form-item>
+                <a-textarea
+                  :rows="2"
+                  v-model="groupComments[(currentGroup - 1) * 8 + (row - 1) * 2 + col - 1]"
+                  placeholder="Write your comments here.
+You can resize the comment box by dragging its bottom-right corner."
+                  @pressEnter.native.prevent
+                />
+              </a-form-item>
+            </div>
+
           </a-col>
         </a-row>
         
       </div>
-      <!-- 分页 -->
+
+      <!-- pages -->
       <div style="text-align: center; margin-top: 24px">
         <a-pagination
           :current="currentGroup"
           :page-size="1"
-          :total="Math.ceil(totalImages / 24)"
+          :total="Math.ceil(totalImages / 32)"
           @change="handleGroupChange"
           simple
         />
       </div>
     </div>
     
+    <!-- rate -->
     <div class="steps-content rate-content" v-if="current === 1">
       <div class="rating-summary">
         <a-row :gutter="[24, 24]">
@@ -155,12 +183,39 @@
 
               <div v-for="q in 4" :key="'rating-q' + q" class="rating-row">
                 <span class="rating-text">Q{{ q }}:</span>
+                <!-- <a-slider
+                  v-model="groupRatings[realGroupIndex(index)][q - 1]"
+                  :min="1"
+                  :max="5"
+                  :step="1"
+
+                  :tooltip-visible="groupRatings[realGroupIndex(index)][q - 1] !== null && groupRatings[realGroupIndex(index)][q - 1] !== 0"
+                  :marks="{1:'1',2:'2',3:'3',4:'4',5:'5'}"
+                  :handle-style="groupRatings[realGroupIndex(index)][q - 1] > 0 ? {} : { opacity: 0 }"
+                  @before-change="handleSliderStart(realGroupIndex(index), q - 1)"
+
+                  style="width: 60%; display: inline-block; margin: 0 8px;"
+                /> -->
                 <a-slider
                   v-model="groupRatings[realGroupIndex(index)][q - 1]"
                   :min="1"
                   :max="5"
+                  :step="1"
+                  :marks="{1:'1',2:'2',3:'3',4:'4',5:'5'}"
+                  :handle-style="groupRatings[realGroupIndex(index)][q - 1] !== null ? {} : { opacity: 0 }"
+                  @before-change="handleSliderStart(realGroupIndex(index), q - 1)"
                   style="width: 60%; display: inline-block; margin: 0 8px;"
                 />
+
+
+                <!-- 如果值是 null，显示一个点击即可设置的“占位条” -->
+                <div
+                  v-if="groupRatings[realGroupIndex(index)][q - 1] == null"
+                  class="rating-placeholder"
+                  @click="handlePlaceholderClick($event, realGroupIndex(index), q - 1)"
+                  style="width: 60%; height: 8px; background: #eee; display: inline-block; border-radius: 4px; cursor: pointer;"
+                ></div>
+
                 <a-input-number
                   v-model="groupRatings[realGroupIndex(index)][q - 1]"
                   :min="1"
@@ -190,7 +245,7 @@
       </a-button>
       <a-button 
         v-if="current < steps.length - 1" 
-        :disabled="currentGroup < Math.ceil(totalImages / 24)" 
+        :disabled="currentGroup < Math.ceil(totalImages / 32)" 
         type="primary" 
         @click="next"
       >
@@ -233,10 +288,20 @@
   
 </template>
 
-<script>
-import draggable from "vuedraggable";
+<script lang="ts">
+// interface RankingItem {
+//   img: number;
+//   rank: number | null;
+// }
+
+// interface GroupRanking {
+//   groupIndex: number;
+//   rankings: RankingItem[];
+//   ratings: number[];
+// }
+
 export default {
-  components: { draggable },
+  // components: { draggable },
   data() {
     return {
       current: 0,
@@ -244,9 +309,7 @@ export default {
         {
           // title: 'Sorting',
         },
-        {
-          // title: 'Scoring',
-        },
+        {},
 
       ],
       currentGroup: 1,
@@ -262,9 +325,25 @@ export default {
       groupRatings: [],
       currentRatePage: 1, 
       groupOrders: [],
-      originalRankings: {}
+      // originalRankings: {},
+      
+      // username
+      visible: true,
+      userName: '',
+      participantName: '',
+
+      // comments
+      groupComments: [],
+
+      rankOptions: [
+        { label: "1", value: 1 },
+        { label: "2", value: 2 },
+        { label: "3", value: 3 },
+        { label: "4", value: 4 }
+      ]
     };
   },
+
   computed:{
     paginatedRatings() {
       const start = (this.currentRatePage - 1) * 16;
@@ -275,11 +354,120 @@ export default {
   },
   methods: {
     next() {
+      // 校验 ranking
+      if (this.current === 0) {
+        const unfilled = this.groupRankings.some(group =>
+          group.some(question =>
+            question.some(item => item.rank === null)
+          )
+        );
+        if (unfilled) {
+          this.$message.error("Please complete all rankings before proceeding!");
+          return;
+        }
+      }
       this.current++;
     },
     prev() {
       this.current--;
     },
+
+    handleOk() {
+      if (!this.userName.trim()) {
+        this.$message.error("please enter your name!");
+        return;
+      }
+      this.participantName = this.userName.trim();
+      this.visible = false;
+    },
+
+
+    // handleChange(value) {
+    //   console.log(`selected ${value}`);
+    // },
+
+    handleSliderStart(groupIdx, qIdx) {
+      if (this.groupRatings[groupIdx][qIdx] === 0 || this.groupRatings[groupIdx][qIdx] === null) {
+        // 第一次操作，初始化为 1
+        this.$set(this.groupRatings[groupIdx], qIdx, 1);
+      }
+    },
+
+    handlePlaceholderClick(event, groupIdx, qIdx) {
+      const el = event.currentTarget;
+      const rect = el.getBoundingClientRect();
+      const clickX = event.clientX - rect.left; // 点击相对元素左边位置
+      const width = rect.width;
+
+      const min = 1;
+      const max = 5;
+
+      // 计算分数
+      let score = Math.round((clickX / width) * (max - min) + min);
+      if (score < min) score = min;
+      if (score > max) score = max;
+
+      // 设置到 groupRatings
+      this.$set(this.groupRatings[groupIdx], qIdx, score);
+    },
+
+    
+    // getAvailableRanks(groupIdx, qIndex, currentImg) {
+    //   // 获取当前问题的所有图片
+    //   var question = (this.groupRankings && this.groupRankings[groupIdx] && this.groupRankings[groupIdx][qIndex]) || [];
+
+    //   // 收集已经被其他图片选的 rank
+    //   var usedRanks = question
+    //     .filter(function(i) { return i.img !== currentImg })
+    //     .map(function(i) { return i.rank })
+    //     .filter(function(r) { return r !== null && r !== undefined });
+
+    //   // 返回 options，并禁用已用的 rank
+    //   return this.rankOptions.map(function(option) {
+    //     return {
+    //       label: option.label,
+    //       value: option.value,
+    //       disabled: usedRanks.indexOf(option.value) !== -1
+    //     };
+    //   });
+    // },
+
+    // getAvailableRanks(groupIdx: number, qIndex: number): Array<{ label: string; value: number; disabled?: boolean }> {
+    //   const questionGroup = this.groupRankings[groupIdx];
+    //   if (!questionGroup) return [];
+
+    //   const question = questionGroup[qIndex];
+    //   if (!question) return [];
+
+    //   const maxRank = 4;
+
+    //   const rankCounts: Record<number, number> = {};
+    //   question.forEach(item => {
+    //     if (item.rank != null && item.rank > 0) {
+    //       rankCounts[item.rank] = (rankCounts[item.rank] || 0) + 1;
+    //     }
+    //   });
+
+    //   const available: { label: string; value: number; disabled?: boolean }[] = [];
+    //   for (let r = 1; r <= maxRank; r++) {
+    //     let totalUsed = 0;
+    //     for (let k = 1; k <= r; k++) {
+    //       totalUsed += rankCounts[k] || 0;
+    //     }
+
+    //     available.push({
+    //       label: r.toString(),
+    //       value: r,
+    //       disabled: totalUsed >= maxRank
+    //     });
+    //   }
+
+    //   return available;
+    // },
+
+
+
+
 
     getImagePath(n) {
       return require(`@/assets/photo/${n}.jpg`);
@@ -289,42 +477,27 @@ export default {
       return Array.from({ length: 4 }, (_, i) => base + i + 1);
     },
     groupImagesShuffled(groupIdx) {
-      // return this.groupOrders[(this.currentGroup - 1) * 6 + (groupIdx - 1)];
-      const idx = (this.currentGroup - 1) * 6 + (groupIdx - 1);
+      // return this.groupOrders[(this.currentGroup - 1) * 8 + (groupIdx - 1)];
+      const idx = (this.currentGroup - 1) * 8 + (groupIdx - 1);
       return this.groupOrders[idx] || this.groupOrders[0];
     },
 
     onRankingChange(event, groupIdx, qIndex) {
-      // const elOrder = [...event.to.children].map(el => parseInt(el.textContent.trim()));
-      // const base = (this.currentGroup - 1) * 24 + groupIdx * 4;
-      // this.$set(this.groupRankings[groupIdx], qIndex, elOrder.map(n => base + ((n + 3) % 4)));
-      // // 前端拖拽后，得到的显示顺序
-      // const draggedNumbers = [...event.to.children].map(el => parseInt(el.textContent.trim()));
-      // // 映射回原始顺序
-      // const originalNumbers = draggedNumbers.map(num => this.groupOriginalOrders[groupIdx].indexOf(num) + 1);
-
-      // this.$set(this.groupRankings[groupIdx], qIndex, draggedNumbers); // 保持显示顺序
-      // this.$set(this.groupRankings[groupIdx], 'original', originalNumbers); // 额外存原始顺序
-      // const draggedNumbers = [...event.to.children].map(el => parseInt(el.textContent.trim())); // 1–4
-
-      // // 用 groupOrders[groupIdx] 把 [1,2,3,4] 的位置映射回原始编号
-      // // 例如 groupOrders[groupIdx] = [3,2,1,4] （显示打乱顺序）
-      // const originalNumbers = draggedNumbers.map(n => this.groupOrders[groupIdx][n - 1]);
-
-      // // 更新显示顺序（仍然是 1–4）
-      // this.$set(this.groupRankings[groupIdx], qIndex, draggedNumbers);
-
-      // // 额外保存映射后的原始编号，用于提交
-      // if (!this.originalRankings) this.originalRankings = {};
-      // if (!this.originalRankings[groupIdx]) this.originalRankings[groupIdx] = {};
-      // this.originalRankings[groupIdx][qIndex] = originalNumbers;
-      
       const newOrder = this.groupRankings[groupIdx][qIndex];
-      console.log("拖拽后的原始顺序:", newOrder);
       this.$set(this.groupRankings[groupIdx], qIndex, [...newOrder]);
-
     },
     
+    // toggleRank(groupIdx, qIndex, img, rank, checked) {
+    //   const item = this.groupRankings[groupIdx][qIndex].find(i => i.img === img);
+    //   if (!item) return;
+
+    //   if (checked) {
+    //     if (!item.rank.includes(rank)) item.rank.push(rank);
+    //   } else {
+    //     item.rank = item.rank.filter(r => r !== rank);
+    //   }
+    // },
+
     openPreview(groupIdx, index) {
       this.previewGroupImages = this.groupImagesShuffled(groupIdx);
       this.currentIndex = index;
@@ -336,14 +509,6 @@ export default {
       this.previewGroupImages = [imageIndex];
       this.currentIndex = 0; 
       this.previewVisible = true;
-      
-      // const groupImages = Array.from({ length: 4 }, (_, i) => groupIdx * 4 + i + 1);
-      // this.previewGroupImages = groupImages;
-      // this.currentIndex = 3; // 第4张图的 index 是 3
-      // this.previewVisible = true;
-      // this.$nextTick(() => {
-      //   this.$refs.carousel.goTo(3);
-      // });
     },
 
     goToSlide(index) {
@@ -377,20 +542,21 @@ export default {
         Array.from({ length: 4 }, (_, j) => i * 4 + j + 1)
       );
 
-
-      // this.groupRankings = Array.from({ length: totalGroups },() =>
-      // // , (_, g) 
-      // // Array.from({ length: 4 }, () => [i * 4 + 1, i * 4 + 2, i * 4 + 3, i * 4 + 4])
-      //     Array.from({ length: 4 }, () => [1,2,3,4])
-
+      // this.groupRankings = Array.from({ length: totalGroups }, (_, g) =>
+      //   Array.from({ length: 4 }, () => [...this.groupOrders[g]])
       // );
       this.groupRankings = Array.from({ length: totalGroups }, (_, g) =>
-        Array.from({ length: 4 }, () => [...this.groupOrders[g]])
+        Array.from({ length: 4 }, () =>
+          this.groupOrders[g].map(img => ({ img, rank: null }))
+        )
       );
 
-      // add ratings
+      this.groupComments = Array.from({ length: totalGroups }, () =>''
+        // Array.from({ length: 4 }, () => '')
+      );
+
       this.groupRatings = Array.from({ length: totalGroups }, () =>
-        Array.from({ length: 4 }, () => 0) // 默认评分0分（或其他）
+        Array.from({ length: 4 }, () => null) // 默认评分0分（或其他）
       );
 
     },
@@ -399,18 +565,45 @@ export default {
     },
 
     submitForm() {
+      // 校验 rating
+      const unfilledRating = this.groupRatings.some(group =>
+        group.some(score => !score || score === 0)
+      );
+      if (unfilledRating) {
+        this.$message.error("Please complete all ratings before submitting!");
+        return;
+      }
+
+
       this.isSubmitting = true;
+
       const payload = {
-        groups: this.groupRankings.map((rankings, i) => ({
-          groupIndex: i + 1,
-          rankings,
-          // rankings: rankings.original || rankings, // 提交原始顺序
-          // rankings: Object.values((this.originalRankings && this.originalRankings[i]) || {}),
-    
-          // add ratings
-          ratings:this.groupRatings[i]
-        }))
+        participantName: this.participantName,  // username
+        groups: this.groupRankings.map((groupQuestions, groupIdx) => {
+          const originalOrder = this.groupOriginalOrders[groupIdx]; 
+          const shuffledOrder = this.groupOrders[groupIdx]; 
+
+          // 每个问题都要单独处理
+          const originalRanks = groupQuestions.map(questionItems => {
+            const userRanks = questionItems.map(item => item.rank);
+            // 映射回原始顺序
+            return originalOrder.map(img => {
+              const shuffledIndex = shuffledOrder.indexOf(img);
+              return userRanks[shuffledIndex];
+            });
+          });
+
+          return {
+            groupIndex: groupIdx + 1,
+            rankings: originalRanks,  // 二维数组 [ [..], [..], [..], [..] ]
+            ratings: this.groupRatings[groupIdx],
+            comments: this.groupComments[groupIdx]
+          };
+        })
       };
+
+      console.log(payload);
+
       fetch("https://zhilan-leo-il-photography-backward.hf.space/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -430,7 +623,58 @@ export default {
         })
         .finally(() => (this.isSubmitting = false));
     }
-  },
+
+
+    // submitForm() {
+    //   this.isSubmitting = true;
+      
+    //   const payload = {
+    //     groups: this.groupRankings.map((groupQuestions, groupIdx) => {
+    //       const originalOrder = this.groupOriginalOrders[groupIdx]; 
+    //       const shuffledOrder = this.groupOrders[groupIdx]; 
+
+    //       // 每个问题都要单独处理
+    //       const originalRanks = groupQuestions.map(questionItems => {
+    //         const userRanks = questionItems.map(item => item.rank);
+    //         // 映射回原始顺序
+    //         return originalOrder.map(img => {
+    //           const shuffledIndex = shuffledOrder.indexOf(img);
+    //           return userRanks[shuffledIndex];
+    //         });
+    //       });
+
+    //       return {
+    //         groupIndex: groupIdx + 1,
+    //         rankings: originalRanks,  // 二维数组 [ [..], [..], [..], [..] ]
+    //         ratings: this.groupRatings[groupIdx]
+    //       };
+    //     })
+    //   };
+
+    //   console.log(payload);
+
+    //   fetch("https://zhilan-leo-il-photography-backward.hf.space/submit", {
+    //     method: "POST",
+    //     headers: { "Content-Type": "application/json" },
+    //     body: JSON.stringify(payload)
+    //   })
+    //     .then(response => {
+    //       if (!response.ok) throw new Error("Network response was not ok");
+    //       return response.json();
+    //     })
+    //     .then(data => {
+    //       console.log("submit:", data);
+    //       this.$router.push("/thanks");
+    //     })
+    //     .catch(err => {
+    //       console.error("submit error:", err);
+    //       this.$message.error("Failed");
+    //     })
+    //     .finally(() => (this.isSubmitting = false));
+    //   }
+
+
+    },
   
 
   mounted() {

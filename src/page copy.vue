@@ -10,7 +10,7 @@
 
     <div class="description" ref="questionIntro">
       <p><strong>Objective:</strong> To evaluate the quality of photographic works from multiple dimensions.</p>
-      <p><strong>Note:</strong> For each question, please drag to rank all 4 images, and rate only the 4th image separately.</p>
+      <p><strong>Note:</strong> For each question, drag to rank all 4 images in the first step, and rate only the designated image individually in the second step.</p>
       <p><strong>Questionnaire:</strong></p>
       <ol>
         <li>How well is the image composited?</li>
@@ -21,7 +21,7 @@
     </div>
 
     <div class="tips-bar">
-      <p><strong>Tips:</strong> Click images to enlarge. Drag numbers to rank each group's 4 images per question. On desktop, double click (hold the second); 
+      <p><strong>Tips:</strong> Click images to enlarge. In the first step, drag the numbers to rank each group of four photos. In the second step, drag the slider to score the photos. On desktop, double click (hold the second); 
         on mobile, press and hold or double click (hold the second)</p>
     </div>
 
@@ -77,25 +77,25 @@
                 <div class="ranking-bar">
                   
                   <span class="ranking-label">Best</span>
+
                   <draggable
                     :list="groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
-                    @change="onRankingChange"
+                    @change="event => onRankingChange(event, (currentGroup - 1) * 6 + (row - 1) * 2 + col - 1, qIndex)"
                     :options="{ animation: 200 }"
                     class="drag-list"
                     tag="div"
                   >
-                  <!-- @update="event => onRankingChange(event, (currentGroup - 1) * 6 + (row - 1) * 2 + col - 1, qIndex)"
-                    -->
                     <div
                       v-for="num in groupRankings[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][qIndex]"
                       :key="num"
                       class="drag-number"
                     >
-                      <!-- {{ (num % 4 === 0 ? 4 : num % 4) }} -->
-                      {{ groupOriginalOrders[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1][(num - 1) % 4] }}
-
+                      <!-- 显示成 1-4，而不是 num 本身 -->
+                      {{ groupOrders[(currentGroup - 1) * 6 + (row - 1) * 2 + col - 1].indexOf(num) + 1 }}
                     </div>
                   </draggable>
+
+
                   <span class="ranking-label">Worst</span>
 
                 </div>
@@ -131,7 +131,7 @@
           >
             <div class="rating-group-card">
               <img
-                :src="getImagePath((realGroupIndex(index) * 4) + 4)"
+                :src="getImagePath((realGroupIndex(index) * 4) + 1)"
                 class="summary-img"
                 @click="openPreview2(realGroupIndex(index))"
               />
@@ -225,10 +225,10 @@ export default {
       current: 0,
       steps: [
         {
-          title: 'First',
+          // title: 'Sorting',
         },
         {
-          title: 'Second',
+          // title: 'Scoring',
         },
 
       ],
@@ -244,7 +244,8 @@ export default {
       groupRankings: [],
       groupRatings: [],
       currentRatePage: 1, 
-      groupOrders: []
+      groupOrders: [],
+      originalRankings: {}
     };
   },
   computed:{
@@ -277,26 +278,20 @@ export default {
     },
 
     onRankingChange(event, groupIdx, qIndex) {
-      // const elOrder = [...event.to.children].map(el => parseInt(el.textContent.trim()));
-      // const base = (this.currentGroup - 1) * 24 + groupIdx * 4;
-      // this.$set(this.groupRankings[groupIdx], qIndex, elOrder.map(n => base + ((n + 3) % 4)));
-      // 前端拖拽后，得到的显示顺序
-      const draggedNumbers = [...event.to.children].map(el => parseInt(el.textContent.trim())); // e.g., [2,1,3,4]
+      const newOrder = this.groupRankings[groupIdx][qIndex];
+      console.log("拖拽后的原始顺序:", newOrder);
+      this.$set(this.groupRankings[groupIdx], qIndex, [...newOrder]);
 
-      // groupOrders[groupIdx] 是前端显示顺序对应的原始编号
-      // 映射回原始顺序
-      const originalNumbers = draggedNumbers.map(num => this.groupOrders[groupIdx][num - 1]);
-
-      this.$set(this.groupRankings[groupIdx], qIndex, originalNumbers); 
     },
+    
     openPreview(groupIdx, index) {
-      this.previewGroupImages = this.groupImages(groupIdx);
+      this.previewGroupImages = this.groupImagesShuffled(groupIdx);
       this.currentIndex = index;
       this.previewVisible = true;
       this.$nextTick(() => this.$refs.carousel.goTo(index));
     },
     openPreview2(groupIdx) {
-      const imageIndex = groupIdx * 4 + 4;
+      const imageIndex = groupIdx * 4 + 1;
       this.previewGroupImages = [imageIndex];
       this.currentIndex = 0; 
       this.previewVisible = true;
@@ -342,8 +337,14 @@ export default {
       );
 
 
-      this.groupRankings = Array.from({ length: totalGroups }, (_, i) =>
-        Array.from({ length: 4 }, () => [i * 4 + 1, i * 4 + 2, i * 4 + 3, i * 4 + 4])
+      // this.groupRankings = Array.from({ length: totalGroups },() =>
+      // // , (_, g) 
+      // // Array.from({ length: 4 }, () => [i * 4 + 1, i * 4 + 2, i * 4 + 3, i * 4 + 4])
+      //     Array.from({ length: 4 }, () => [1,2,3,4])
+
+      // );
+      this.groupRankings = Array.from({ length: totalGroups }, (_, g) =>
+        Array.from({ length: 4 }, () => [...this.groupOrders[g]])
       );
 
       // add ratings
@@ -362,6 +363,9 @@ export default {
         groups: this.groupRankings.map((rankings, i) => ({
           groupIndex: i + 1,
           rankings,
+          // rankings: rankings.original || rankings, // 提交原始顺序
+          // rankings: Object.values((this.originalRankings && this.originalRankings[i]) || {}),
+    
           // add ratings
           ratings:this.groupRatings[i]
         }))
@@ -386,6 +390,7 @@ export default {
         .finally(() => (this.isSubmitting = false));
     }
   },
+  
 
   mounted() {
     this.initRankings();
