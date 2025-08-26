@@ -10,7 +10,7 @@
 
     <div class="description" ref="questionIntro">
       <p><strong>Objective:</strong> To evaluate the quality of photographic works from multiple dimensions.</p>
-      <p><strong>Note:</strong> For each question, please drag to rank all 4 images, and rate only the 4th image separately.</p>
+      <p><strong>Note:</strong> For each question, drag to rank all 4 images in the first step, and rate only the designated image individually in the second step.</p>
       <p><strong>Questionnaire:</strong></p>
       <ol>
         <li>How well is the image composited?</li>
@@ -21,7 +21,7 @@
     </div>
 
     <div class="tips-bar">
-      <p><strong>Tips:</strong> Click images to enlarge. Drag numbers to rank each group's 4 images per question. On desktop, double click (hold the second); 
+      <p><strong>Tips:</strong> Click images to enlarge. In the first step, drag the numbers to rank each group of four photos. In the second step, drag the slider to score the photos. On desktop, double click (hold the second); 
         on mobile, press and hold or double click (hold the second)</p>
     </div>
 
@@ -242,10 +242,10 @@ export default {
       current: 0,
       steps: [
         {
-          title: 'First',
+          // title: 'Sorting',
         },
         {
-          title: 'Second',
+          // title: 'Scoring',
         },
 
       ],
