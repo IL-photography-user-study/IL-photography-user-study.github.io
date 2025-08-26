@@ -326,7 +326,7 @@ export default {
     },
     
     openPreview(groupIdx, index) {
-      this.previewGroupImages = this.groupImages(groupIdx);
+      this.previewGroupImages = this.groupImagesShuffled(groupIdx);
       this.currentIndex = index;
       this.previewVisible = true;
       this.$nextTick(() => this.$refs.carousel.goTo(index));
