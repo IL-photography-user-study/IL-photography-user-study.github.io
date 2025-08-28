@@ -7,20 +7,27 @@
         Anonymous Questionnaire for Aesthetic Assessment
       </h2>
     </header>
-
+    <!-- Note for ranking -->
     <div class="description" ref="questionIntro">
       <p><strong>Objective:</strong> To evaluate the quality of photographic works from multiple dimensions.</p>
-      <p><strong>Note:</strong></p>
-      <ol>
-        <li>
+      <div v-if="current === 0" class="note-section" style="margin-bottom: 16px;">
+        <p><strong>Note:</strong></p>
+        <ol>
           Use the dropdown selector under each image to assign its rank. 
-          <p>- Multiple images can share the same rank. </p>
-          <p>- After tied ranks, the next rank skips the occupied positions.</p>
-        </li>
-        <li>
-          Use the slider to score each designated image. 
-        </li>
-      </ol>
+          <p>- Multiple images can share the same rank.</p>
+          <p>- After tied ranks, the next rank skips the occupied positions (discontinuous ranking).</p>
+        </ol>
+      </div>
+      <!-- Note for rating -->
+      <div v-else-if="current === 1" class="note-section" style="margin-bottom: 16px;">
+        <p><strong>Note:</strong></p>
+        <ol>
+          Use the slider to score each designated image.  
+          <p>-  The scoring range is 1 ~ 5.</p>
+          <p>-  Click the slider to activate and select a score, or enter the score directly in the input box.</p>
+        </ol>
+      </div>
+
       <p><strong>Questionnaire:</strong></p>
       <ol>
         <li>How well is the image composited?</li>
@@ -31,26 +38,40 @@
     </div>
 
     <div class="tips-bar">
-      <p><strong>Tips:</strong> Click images to enlarge. In the second step, click the slider to activate it and assign a value.</p>
+      <p><strong>Tips:</strong> Click images to enlarge.</p>
     </div>
 
-    <!-- username -->
+    <!-- isenthusiast & username -->
     <div>
       <a-modal 
       v-model="visible" 
-      title="Please enter your name" 
+      title="Some questions before you start" 
       :closable="false" 
       :maskClosable="false" 
       :keyboard="false" 
-      
       @ok="handleOk">
         <div class="components-input-demo-presuffix">
+          <span>Please enter your name here.</span>
+          <br>
           <a-input v-model="userName" placeholder="" @pressEnter="handleOk">
             <a-icon slot="prefix" type="user" />
             <a-tooltip slot="suffix" title="Please enter your name">
               <a-icon type="info-circle" style="color: rgba(0,0,0,.45)" />
             </a-tooltip>
           </a-input>
+        </div>
+        <div>
+          <br>
+          <span>Are you a photography enthusiast?</span>
+          <br>
+          <a-radio-group v-model="value" @change="onChange">
+            <a-radio :value="1">
+              Yes
+            </a-radio>
+            <a-radio :value="0">
+              No
+            </a-radio>
+          </a-radio-group>
         </div>
         <template #footer>
           <a-button type="primary" @click="handleOk">ok</a-button>
@@ -64,6 +85,61 @@
         <a-step v-for="item in steps" :key="item.title" :title="item.title" />
       </a-steps>
     </div>
+
+    <br>
+    <a-collapse v-if="current === 0" v-model="activeKey">
+      <a-collapse-panel key="1" header="Examples">
+        <!-- Example 1 -->
+        <div style="margin-bottom: 20px;">
+          <p><strong>Example 1:</strong> Choose a rank for each photo using the drop-down box.</p>
+          <div class="ranking-table" style="display: table; margin: 0 auto;">
+            <!-- 表头 -->
+            <div class="ranking-header" style="display: table-row;">
+              <div v-for="n in 4" :key="'header1-' + n"
+                  style="display: table-cell; text-align: center; padding: 6px;">
+                Image {{ n }}
+              </div>
+            </div>
+            <!-- 示例行：3214 -->
+            <div class="ranking-row" style="display: table-row;">
+              <div v-for="(rank, idx) in [3,2,1,4]" :key="'ex1-' + idx"
+                  style="display: table-cell; text-align: center; padding: 6px;">
+                <a-select v-model="example1[idx]" style="width: 70px">
+                  <a-select-option v-for="n in 4" :key="n" :value="n">{{ n }}</a-select-option>
+                </a-select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Example 2 -->
+        <div>
+          <p><strong>Example 2:</strong> Ties are allowed. If a tie occurs, the next photo will jump by the number of photos tied.
+In the example below, two photos tied for 2nd place → the next photo is 4th place.</p>
+
+          <div class="ranking-table" style="display: table; margin: 0 auto;">
+            <!-- 表头 -->
+            <div class="ranking-header" style="display: table-row;">
+              <div v-for="n in 4" :key="'header2-' + n"
+                  style="display: table-cell; text-align: center; padding: 6px;">
+                Image {{ n }}
+              </div>
+            </div>
+            <!-- 示例行：2241 -->
+            <div class="ranking-row" style="display: table-row;">
+              <div v-for="(rank, idx) in [2,2,4,1]" :key="'ex2-' + idx"
+                  style="display: table-cell; text-align: center; padding: 6px;">
+                <a-select v-model="example2[idx]" style="width: 70px">
+                  <a-select-option v-for="n in 4" :key="n" :value="n">{{ n }}</a-select-option>
+                </a-select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </a-collapse-panel>
+    </a-collapse>
+    
+
 
     <div class="steps-content" v-if="current === 0" >
       <div v-for="row in 4" :key="'row-' + row">
@@ -87,14 +163,16 @@
                   </div>
                 </a-col>
               </a-row>
-
+              
+              
+              <span><strong>Choose the ranking for each image below</strong></span>
               <div
                 class="ranking-section"
                 v-for="(list, qIndex) in groupRankings[(currentGroup - 1) * 8 + (row - 1) * 2 + col - 1]"
                 :key="'ranking-' + ((row - 1) * 2 + col) + '-' + qIndex"
               >
                 <!-- move Question here -->
-                <span class="ranking-title">Q{{ qIndex + 1 }} (Choose the ranking for each image below)</span>
+                <span class="ranking-title">Q{{ qIndex + 1 }} : {{ questionDescriptions[qIndex] }}</span>
                 <div class="ranking-table" style="display: table; margin: 0 auto;">
                   <!-- 表头：Image 1,2,3,4 -->
                   <div class="ranking-header" style="display: table-row;">
@@ -332,8 +410,24 @@ export default {
       userName: '',
       participantName: '',
 
+      // isenthusiast
+      value: 1,
+
+      // example
+      activeKey: ['1'], // 默认展开 Example
+      example1: [3, 2, 1, 4], // 默认值
+      example2: [2, 2, 4, 1], // 默认值
+
       // comments
       groupComments: [],
+
+      questionDescriptions: [
+        "How well is the image composited?",
+        "How well is the main subject emphasized?",
+        "How well does the image highlight the relation between character and background?",
+        "How well does the image tell a story?"
+      ],
+
 
       rankOptions: [
         { label: "1", value: 1 },
@@ -367,9 +461,20 @@ export default {
         }
       }
       this.current++;
+      this.$nextTick(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"  // 平滑滚动
+        });
+      });
+
     },
     prev() {
       this.current--;
+    },
+
+    onChange(e) {
+      console.log('radio checked', e.target.value);
     },
 
     handleOk() {
@@ -579,6 +684,7 @@ export default {
 
       const payload = {
         participantName: this.participantName,  // username
+        answer: this.value,// 1:Yes; 0:No.
         groups: this.groupRankings.map((groupQuestions, groupIdx) => {
           const originalOrder = this.groupOriginalOrders[groupIdx]; 
           const shuffledOrder = this.groupOrders[groupIdx]; 
@@ -799,7 +905,7 @@ export default {
 .ranking-section {
   /* margin: 12px auto;
   max-width: 480px; */
-  margin-top: 16px;
+  margin-top: 12px;
   padding-top: 12px;
   border-top: 1px dashed #d0d0d0;
 }
