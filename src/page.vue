@@ -1,7 +1,7 @@
 <template>
   <div>
     <header>
-      <h1 class="title">Fotobot: Flow Matching Policies for Autonomous Portrait Photography Robot</h1>
+      <h1 class="title">FotoBot: Learning Flow Matching Policies for Human-Centric Robot Photography in Real Life</h1>
       <h2 class="subtitle">
         <img src="@/assets/group.png" style="width:24px; height:24px; vertical-align: middle; margin-right: 8px;">
         Anonymous Questionnaire for Aesthetic Assessment
@@ -216,7 +216,7 @@ In the example below, two photos tied for 2nd place → the next photo is 4th pl
                   :rows="2"
                   v-model="groupComments[(currentGroup - 1) * 8 + (row - 1) * 2 + col - 1]"
                   placeholder="Write your comments here.
-You can resize the comment box by dragging its bottom-right corner."
+On desktop, you can resize the comment box by dragging its bottom-right corner."
                   @pressEnter.native.prevent
                 />
               </a-form-item>
