@@ -1,7 +1,7 @@
 <template>
   <div>
     <header>
-      <h1 class="title">FotoBot: Learning Flow Matching Policies for Human-Centric Robot Photography in Real Life</h1>
+      <h1 class="title">FotoBot: Fully Autonomous Human-Centric Robot Photography in Real Life with Flow Matching Policy</h1>
       <h2 class="subtitle">
         <img src="@/assets/group.png" style="width:24px; height:24px; vertical-align: middle; margin-right: 8px;">
         Anonymous Questionnaire for Aesthetic Assessment
