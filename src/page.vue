@@ -82,7 +82,7 @@
         <a-row :gutter="32" class="group-wrapper">
           <a-col
             class="group-col"
-            :xs="24" :sm="24" :md="12" :lg="12" :xl="12" :xxl="12"
+            :xs="24" :sm="24" :md="24" :lg="12" :xl="12" :xxl="12"
             v-for="col in 2"
             :key="'group-' + ((row - 1) * 2 + col)"
           >
@@ -148,6 +148,8 @@
                       <!-- Q4: 1-9 分数 -->
                       <div v-else style="display:flex; flex-direction:column; align-items:center; gap:4px;">
                         <a-slider
+                          v-if="!isMobile"
+
                           v-model="item.rank"
                           :min="1"
                           :max="9"
@@ -159,7 +161,7 @@
                         />
                         <!-- 如果值是 null，显示一个点击即可设置的“占位条” -->
                         <div
-                          v-if="item.rank == null"
+                          v-if="item.rank == null && !isMobile"
                           class="rating-placeholder"
                           @click="handlePlaceholderClick($event, item)"
                           style="width: 100%; height: 8px; background: #eee; display: inline-block; border-radius: 4px; cursor: pointer;"
@@ -169,7 +171,11 @@
                           v-model="item.rank"
                           :min="1"
                           :max="9"
-                          style="width: 70%; display: inline-block; margin-top: 18px;"
+                          :style="{
+                            width: isMobile ? '100%' : '70%',
+                            display: 'inline-block',
+                            marginTop: '18px'
+                          }"
                         />
                       </div>
                     </div>
@@ -286,6 +292,7 @@ export default {
         "Overall aesthetic score (1–9)"
       ],
 
+      isMobile: window.innerWidth < 768, // 初始判断
       // Q4 分数选项
       // scoreOptions: Array.from({ length: 9 }, (_, i) => ({ label: String(i + 1), value: i + 1 })),
     };
@@ -300,6 +307,9 @@ export default {
   },
 
   methods: {
+    checkMobile() {
+      this.isMobile = window.innerWidth < 768;
+    },
     onChange(e) {
       console.log('radio checked', e.target.value);
     },
@@ -422,11 +432,11 @@ export default {
           })
         )
       );
+
       if (invalid) {
         this.$message.error("Please complete Q1–Q4 for every image before submitting!");
         return;
       }
-
       this.isSubmitting = true;
 
       // 还原到原图顺序的答案
@@ -479,7 +489,12 @@ export default {
 
   mounted() {
     this.initRankings();
-  }
+    window.addEventListener("resize", this.checkMobile);
+
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.checkMobile);
+  },
 };
 </script>
 
