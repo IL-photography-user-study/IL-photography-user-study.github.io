@@ -22,15 +22,16 @@
 
       <p><strong>Questionnaire:</strong></p>
       <ol>
-        <li>How well is the image composited? (Good/Medium/Bad)</li>
-        <li>How well is the main subject emphasized? (Good/Medium/Bad)</li>
-        <li>How well does the image highlight the relation between character and background? (Good/Medium/Bad)</li>
-        <li>Overall aesthetic score (1–9)</li>
+        <li>How is the image's composition?</li>
+        <li>How well is the main subject emphasized?  (considering the pose)</li>
+        <li>How well is the relation between character and background in the image?</li>
+        <li>Overall aesthetic score.</li>
       </ol>
     </div>
 
     <div class="tips-bar">
-      <p><strong>Tips:</strong> Click images to enlarge.</p>
+      <p><strong>Tips:</strong> Click images to enlarge.
+      <strong><u>No need to consider lighting, color tone, clarity, or background logo.</u></strong></p>
     </div>
 
     <!-- isenthusiast & username -->
@@ -67,12 +68,12 @@
       </a-modal>
     </div>
 
-    <br>
+    <!-- <br>
     <div class="step-wrapper">
       <a-steps :current="current">
         <a-step v-for="item in steps" :key="item.title" :title="item.title" />
       </a-steps>
-    </div>
+    </div> -->
 
     <br>
 
@@ -87,6 +88,7 @@
             :key="'group-' + ((row - 1) * 2 + col)"
           >
             <template v-if="(currentGroup - 1) * 8 + (row - 1) * 2 + col <= totalGroups">
+              <h3 class="block-title">Block {{ (currentGroup - 1) * 8 + (row - 1) * 2 + col }}</h3>
               <!-- 图片 1-4 -->
               <a-row :gutter="12">
                 <a-col :span="12" v-for="i in 2" :key="i">
@@ -286,10 +288,10 @@ export default {
 
       // 题目描述
       questionDescriptions: [
-        "How well is the image composited?",
-        "How well is the main subject emphasized?",
-        "How well does the image highlight the relation between character and background?",
-        "Overall aesthetic score (1–9)"
+        "How is the image's composition?",
+        "How well is the main subject emphasized? (considering the pose)",
+        "How well is the relation between character and background in the image?",
+        "Overall aesthetic score."
       ],
 
       isMobile: window.innerWidth < 768, // 初始判断
