@@ -44,10 +44,10 @@
         :keyboard="false" 
         @ok="handleOk">
         <div class="components-input-demo-presuffix">
-          <span>Please enter your name here.</span>
+          <span>Please fill your email address here.</span>
           <br>
           <a-input v-model="userName" placeholder="" @pressEnter="handleOk">
-            <a-icon slot="prefix" type="user" />
+            <a-icon slot="prefix" type="mail" />
             <a-tooltip slot="suffix" title="Please enter your name">
               <a-icon type="info-circle" style="color: rgba(0,0,0,.45)" />
             </a-tooltip>
@@ -80,6 +80,18 @@
     <!-- 仅保留答题页面 -->
     <div class="steps-content" v-if="current === 0">
       <div v-for="row in 4" :key="'row-' + row">
+        <template v-if="(currentGroup - 1) * 8 + (row - 1) * 2 + 1 === 1">
+          <h2 style="margin-top:32px; text-align:center;">Mocap</h2>
+        </template>
+        <template v-if="(currentGroup - 1) * 8 + (row - 1) * 2 + 1 === 13">
+          <h2 style="margin-top:32px; text-align:center;">Indoor</h2>
+        </template>
+        <template v-if="(currentGroup - 1) * 8 + (row - 1) * 2 + 1 === 21">
+          <h2 style="margin-top:32px; text-align:center;">Outdoor</h2>
+        </template>
+
+
+
         <a-row :gutter="32" class="group-wrapper">
           <a-col
             class="group-col"
@@ -126,7 +138,7 @@
                   <!-- 表头：Image 1,2,3,4 -->
                   <div class="ranking-header" style="display: table-row;">
                     <div v-for="n in list.length" :key="'header-' + n"
-                         style="display: table-cell; text-align: center; padding: 4px; width: 25%;">
+                        style="display: table-cell; text-align: center; padding: 4px; width: 25%;">
                       Image {{ n }}
                     </div>
                   </div>
@@ -200,6 +212,7 @@
                 </a-form-item>
               </div>
               <!-- /每个问题 -->
+              
             </template>        
           </a-col>
         </a-row>
@@ -259,8 +272,8 @@ export default {
       current: 0,
       steps: [{ title: 'Questions' }],  // 只保留一个步骤
       currentGroup: 1,
-      totalImages: 80,
-      totalGroups: 20,
+      totalImages: 120,
+      totalGroups: 30,
 
       previewVisible: false,
       currentIndex: 0,
@@ -309,6 +322,21 @@ export default {
   },
 
   methods: {
+    groupFolder(groupIdx) {
+      return this.groupOrders[groupIdx][0].folder;
+    },
+    groupIdxInFolder(groupIdx) {
+      const folder = this.groupFolder(groupIdx);
+      const folderIndex = this.categories.findIndex(c => c.key === folder);
+      const groupsPerFolder = this.totalImages / (this.categories.length * 4);
+      return groupIdx - folderIndex * groupsPerFolder;
+    },
+    getFolderTitle(folderKey) {
+      const c = this.categories.find(c => c.key === folderKey);
+      return c ? c.title : folderKey;
+    },
+
+
     checkMobile() {
       this.isMobile = window.innerWidth < 768;
     },
@@ -328,6 +356,8 @@ export default {
     getImagePath(n) {
       return require(`@/assets/photo/${n}.jpg`);
     },
+    
+
     groupImagesShuffled(groupIdx) {
       const idx = (this.currentGroup - 1) * 8 + (groupIdx - 1);
       return this.groupOrders[idx] || this.groupOrders[0];
@@ -360,7 +390,7 @@ export default {
       const width = rect.width;
 
       const min = 1;
-      const max = 9; // ⚠️ 这里改成 9，因为你 Q4 是 1–9 分制
+      const max = 9; 
 
       let score = Math.round((clickX / width) * (max - min) + min);
       if (score < min) score = min;
@@ -390,12 +420,19 @@ export default {
 
     initRankings() {
       if (this.groupRankings.length > 0) return;
+      // const folders = ["mocap", "indoor", "outdoor"];
       const totalGroups = this.totalImages / 4;
 
       // 每组四张图的打乱顺序
       this.groupOrders = Array.from({ length: totalGroups }, (_, g) => {
+        
         const base = g * 4 + 1;
-        const arr = [base, base + 1, base + 2, base + 3];
+        const arr = [
+          base,
+          base + 1,
+          base + 2,
+          base + 3
+        ];
         return arr.sort(() => Math.random() - 0.5);
       });
 
@@ -414,6 +451,8 @@ export default {
       // 每组评论
       this.groupComments = Array.from({ length: totalGroups }, () => '');
     },
+
+    
 
     realGroupIndex(index) {////////////////////////////////////
       return (this.currentRatePage - 1) * 16 + index;
