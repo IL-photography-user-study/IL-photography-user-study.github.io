@@ -83,10 +83,10 @@
         <template v-if="(currentGroup - 1) * 8 + (row - 1) * 2 + 1 === 1">
           <h2 style="margin-top:32px; text-align:center;">Indoor</h2>
         </template>
-        <template v-if="(currentGroup - 1) * 8 + (row - 1) * 2 + 1 === 5">
+        <template v-if="(currentGroup - 1) * 8 + (row - 1) * 2 + 1 === 9">
           <h2 style="margin-top:32px; text-align:center;">Outdoor</h2>
         </template>
-        <template v-if="(currentGroup - 1) * 8 + (row - 1) * 2 + 1 === 15">
+        <template v-if="(currentGroup - 1) * 8 + (row - 1) * 2 + 1 === 19">
           <h2 style="margin-top:32px; text-align:center;">Mocap</h2>
         </template>
 
