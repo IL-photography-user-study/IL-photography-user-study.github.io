@@ -1,7 +1,7 @@
 <template> 
   <div>
     <header>
-      <h1 class="title">Learning Embodied Aesthetics for Autonomous Robotic Photography</h1>
+      <h1 class="title">Autonomous robotic photography as a creative urban service</h1>
       <h2 class="subtitle">
         <img src="@/assets/group.png" style="width:24px; height:24px; vertical-align: middle; margin-right: 8px;">
         Anonymous Questionnaire for Aesthetic Assessment
